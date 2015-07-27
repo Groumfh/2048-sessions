@@ -44,6 +44,37 @@ TEST(board, setValue)
 	EXPECT_EQ(board.square(1,1),valueSet);
 }
 
+
+TEST(board, isFull)
+{
+	EXPECT_TRUE(Board(0,0).isFull());
+	EXPECT_TRUE(Board(0,0).emptySquares().empty());
+	EXPECT_FALSE(Board(1,1).isFull());
+	EXPECT_FALSE(Board(1,1).emptySquares().empty());
+	EXPECT_EQ(Board(1,1).emptySquares().front(),Board::Pos(0,0));
+	{
+		Board board(1,1);
+		board.setSquare(0,0,10);
+		EXPECT_TRUE(board.isFull());
+		EXPECT_TRUE(Board(0,0).emptySquares().empty());
+	}
+
+	{
+		Board board(3,3);
+		int value = 0;
+		for (int i = 0; i < board.width(); i++){
+			for (int j = 0; j < board.height(); j++){
+				board.setSquare(i,j,value ++);
+			}
+		}
+		EXPECT_FALSE(board.isFull());
+		EXPECT_EQ(board.emptySquares().front(),Board::Pos(0,0));
+		board.setSquare(0,0,10);
+		EXPECT_TRUE(board.isFull());
+		EXPECT_TRUE(board.emptySquares().empty());
+	}
+}
+
 TEST(board, pushOneValue)
 {
 	Board board(3,3);

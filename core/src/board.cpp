@@ -133,8 +133,12 @@ Board::Board(uint32_t width, uint32_t height):
 Board::~Board(){
 }
 
-uint32_t Board::width(){
+uint32_t Board::width() const{
 	return impl_->width_;
+}
+
+uint32_t Board::height() const{
+	return impl_->height_;
 }
 
 void Board::push(Board::Direction direction)
@@ -171,10 +175,6 @@ void Board::push(Board::Direction direction)
 	}
 }
 
-uint32_t Board::height(){
-	return impl_->height_;
-}
-
 uint32_t Board::square(uint32_t x, uint32_t y){
 	ENSURE_ACCESS_VALID(impl_,x,y);
 	return impl_->values_[x][y];
@@ -183,5 +183,22 @@ uint32_t Board::square(uint32_t x, uint32_t y){
 void Board::setSquare(uint32_t x, uint32_t y, uint32_t value){
 	ENSURE_ACCESS_VALID(impl_,x,y);
 	impl_->values_[x][y] = value;
+}
+
+bool Board::isFull() const{
+	if (impl_->values_.empty()) return true;
+	return emptySquares().empty();
+}
+
+std::list<Board::Pos> Board::emptySquares() const {
+	std::list<Board::Pos> res;
+	for (int i = 0;i < width(); i++){
+		for (int j = 0; j < height(); j++){
+			if (impl_->values_[i][j] == 0){
+				res.push_back(Pos(i,j));
+			}
+		}
+	}
+	return res;
 }
 
