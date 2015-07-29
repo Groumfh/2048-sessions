@@ -1,11 +1,30 @@
-#include <core/board.h>
 
-#include <iostream>
+#include "application.h"
+#include "nvg.h"
+#include "glfw.h"
 
 int main(int argc, char **argv){
 
-	Board board(2,2);
-	std::cout << (int)board.width() <<":" << (int)board.height() << std::endl;
+	GLFW::start();
+	if (!GLFW::instance()->isInitialized()){
+		exit(-1);
+	}
 
-	return 0;
+	Application app(argc,argv);
+	if (!app.isInitialized()){
+		exit(-1);
+	}
+
+	NVG::start();
+	if (!NVG::instance()->isInitialized()){
+		exit(-1);
+	}
+
+	int result = app.run();
+
+	NVG::stop();
+	GLFW::stop();
+
+	return result; // 24643257
 }
+

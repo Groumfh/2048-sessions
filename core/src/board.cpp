@@ -1,18 +1,12 @@
-#include <core/board.h>
+#include "core/board.h"
 
 #include <vector>
 #include <exception>
 #include <assert.h>
 
+#include <base.h>
 
 namespace{
-
-class non_copyable {
-public:
-	non_copyable() = default;
-	non_copyable(const non_copyable&) = delete;
-	non_copyable & operator=(const non_copyable&) = delete;
-};
 
 enum Axe{
 	AXE_VERTICAL = Board::BOTTOM|Board::TOP,
