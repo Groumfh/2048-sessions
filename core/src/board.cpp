@@ -25,7 +25,7 @@ bool mergeCondition(Type lValue, Type rValue, Type & res){
 }
 
 template <class ForwardIt>
-void pushArray(ForwardIt itbegin, ForwardIt itEnd){
+void pushArray(ForwardIt itbegin, ForwardIt itEnd, bool& hasChanged){
 	ForwardIt empty = itEnd;
 	ForwardIt lastValue = itEnd;
 	ForwardIt it = itbegin;
@@ -40,12 +40,14 @@ void pushArray(ForwardIt itbegin, ForwardIt itEnd){
 				*lastValue = res;
 				*it = 0;
 				it = lastValue;
+				hasChanged = true;
 			}
 			else if (empty != itEnd){
 				*empty = *it;
 				*it = 0;
 				it = empty;
 				empty = itEnd;
+				hasChanged = true;
 			}
 		}
 		// if it != 0, save the last value position
@@ -137,19 +139,20 @@ uint32_t Board::height() const{
 	return impl_->height_;
 }
 
-void Board::push(Board::Direction direction)
+bool Board::push(Board::Direction direction)
 {
+	bool hasChangedState = false;
 	if (direction & AXE_HORIZONTAL && width() > 1)
 	{
 		for (int i = 0; i < height(); i++){
 			if (direction == Board::LEFT){
 				Array row = impl_->getRow(i);
-				pushArray(row.begin(),row.end());
+				pushArray(row.begin(),row.end(),hasChangedState);
 				impl_->setRow(i,row);
 			}
 			else {
 				Array row = impl_->getRow(i);
-				pushArray(row.rbegin(),row.rend());
+				pushArray(row.rbegin(),row.rend(),hasChangedState);
 				impl_->setRow(i,row);
 			}
 		}
@@ -159,16 +162,17 @@ void Board::push(Board::Direction direction)
 		for (int i = 0;i < width(); i++){
 			if (direction == Board::TOP){
 				Array column = impl_->getColumn(i);
-				pushArray(column.begin(),column.end());
+				pushArray(column.begin(),column.end(),hasChangedState);
 				impl_->setColumn(i,column);
 			}
 			else {
 				Array column = impl_->getColumn(i);
-				pushArray(column.rbegin(),column.rend());
+				pushArray(column.rbegin(),column.rend(),hasChangedState);
 				impl_->setColumn(i,column);
 			}
 		}
 	}
+	return hasChangedState;
 }
 
 uint32_t Board::square(uint32_t x, uint32_t y){
@@ -186,8 +190,8 @@ bool Board::isFull() const{
 	return emptySquares().empty();
 }
 
-std::list<Board::Pos> Board::emptySquares() const {
-	std::list<Board::Pos> res;
+std::vector<Board::Pos> Board::emptySquares() const {
+	std::vector<Board::Pos> res;
 	for (int i = 0;i < width(); i++){
 		for (int j = 0; j < height(); j++){
 			if (impl_->values_[i][j] == 0){

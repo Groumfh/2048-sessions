@@ -5,6 +5,8 @@
 #include <GLFW/glfw3.h>
 #include "nvg.h"
 
+#include <random>
+
 #include <resources_path.h>
 
 namespace{
@@ -13,26 +15,113 @@ static Application* app = NULL;
 
 }
 
-Application::Application(int argc, char** argv):
+class Application::Impl_ : public non_copyable
+{
+public:
+
+	Impl_();
+
+	std::unique_ptr<GLFWwindow,void(*)(GLFWwindow*)> window_;
+	std::unique_ptr<Board> board_;
+	std::unique_ptr<BoardView> boardView_;
+
+	static void resizeCallback(GLFWwindow* window, int width, int height);
+	static void keyCallBack(GLFWwindow* window, int key, int scancode, int action, int mods);
+
+	void paintEvent(NVGcontext* context);
+	void keyEvent(int key, int scancode, int action, int mods);
+
+	void pushOnBoard(Board::Direction direction);
+};
+
+Application::Impl_::Impl_():
 	window_(glfwCreateWindow( 300, 300, "2048", NULL, NULL),glfwDestroyWindow),
-	board_(new Board(4,4)){
+	board_(new Board(4,4))
+{
+}
 
+void Application::Impl_::resizeCallback(GLFWwindow* window, int width, int height){
+	glViewport( 0, 0, (GLint) width, (GLint) height);
+	NVGcontext* vgContext = NVG::instance()->context();
+	glClearColor(0.3f, 0.3f, 0.32f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
 
-	board_->setSquare(0,0,4);
-	board_->setSquare(0,3,8);
-	board_->setSquare(1,2,2);
-	board_->setSquare(3,2,2);
+	// redraw directly
+	app->impl_->paintEvent(vgContext);
+
+	glfwSwapBuffers(window);
+}
+
+void Application::Impl_::keyCallBack(GLFWwindow* window, int key, int scancode, int action, int mods){
+	app->impl_->keyEvent(key,scancode,action,mods);
+}
+
+void Application::Impl_::paintEvent(NVGcontext* context){
+	float pxRatio = 1.f;
+	int width, height;
+	glfwGetFramebufferSize(window_.get(), &width, &height);
+	nvgBeginFrame(context, width, height, pxRatio);
+
+	int sizemin = std::min(width,height);
+	Rect region(20,20,sizemin-40, sizemin-40);
+	if (width < height){
+		region.move(0,(height - width)/2.f);
+	}else{
+		region.move((width - height)/2.f,0);
+	}
+
+	boardView_->paint(context,region);
+
+	nvgEndFrame(context);
+}
+
+void Application::Impl_::keyEvent(int key, int scancode, int action, int mods){
+
+	if (action == GLFW_PRESS){
+		switch(key){
+			case GLFW_KEY_UP: pushOnBoard(Board::TOP); return;
+			case GLFW_KEY_DOWN: pushOnBoard(Board::BOTTOM); return;
+			case GLFW_KEY_LEFT: pushOnBoard(Board::LEFT); return;
+			case GLFW_KEY_RIGHT: pushOnBoard(Board::RIGHT); return;
+		}
+	}
+
+	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS){
+		glfwSetWindowShouldClose(window_.get(), GL_TRUE);
+	}
+}
+
+void Application::Impl_::pushOnBoard(Board::Direction direction){
+	if (board_->push(direction)){
+		// generate a random square
+		std::vector<Board::Pos> squares = board_->emptySquares();
+		if (squares.size() != 0){
+			static std::default_random_engine generator;
+			std::uniform_int_distribution<int> distribution(0,squares.size()-1);
+			int index = distribution(generator);
+			board_->setSquare(squares[index].x,squares[index].y,std::uniform_int_distribution<int>(0,1)(generator)? 2:4);
+		}
+	}
+}
+
+Application::Application(int argc, char** argv):
+	impl_(new Impl_){
+
+	impl_->board_->setSquare(0,0,4);
+	impl_->board_->setSquare(0,3,8);
+	impl_->board_->setSquare(1,2,2);
+	impl_->board_->setSquare(3,2,2);
 
 	assert(app == NULL);
 	app = this;
 
-	boardView_.reset(new BoardView(board_.get()));
+	impl_->boardView_.reset(new BoardView(impl_->board_.get()));
 	// Set callback functions
-	glfwSetKeyCallback(window_.get(), Application::keyEvent);
-	glfwSetFramebufferSizeCallback(window_.get(),Application::resizeWindow);
+	glfwSetKeyCallback(impl_->window_.get(), Application::Impl_::keyCallBack);
+	glfwSetFramebufferSizeCallback(impl_->window_.get(),Application::Impl_::resizeCallback);
 
 	glfwWindowHint(GLFW_DEPTH_BITS, 16);
-	glfwMakeContextCurrent(window_.get());
+	glfwMakeContextCurrent(impl_->window_.get());
 	glfwSwapInterval(0);
 }
 
@@ -40,7 +129,7 @@ Application::~Application(){
 }
 
 bool Application::isInitialized() const{
-	return window_.get() != NULL;
+	return impl_->window_.get() != NULL;
 }
 
 bool Application::initGL(){
@@ -58,61 +147,21 @@ bool Application::initGL(){
 	return true;
 }
 
-void Application::paint(NVGcontext* context)
-{
-	float pxRatio = 1.f;
-	int width, height;
-	glfwGetFramebufferSize(window_.get(), &width, &height);
-	nvgBeginFrame(context, width, height, pxRatio);
-
-	Rect region;
-	region.x = 20;
-	region.y = 20;
-	region.height = height-40;
-	region.width = width-40;
-
-	boardView_->paint(context,region);
-
-	nvgEndFrame(context);
-}
-
-bool Application::propagateKeyEvent(int key, int scancode, int action, int mods){
-	return boardView_->keyEvent(key,scancode,action,mods);
-}
-
 int Application::run()
 {
-	while(!glfwWindowShouldClose(window_.get()) )
+	while(!glfwWindowShouldClose(impl_->window_.get()) )
 	{
-		NVGcontext* vgContext = NVG::instance()->context();
+		NVGcontext* context = NVG::instance()->context();
 		glClearColor(0.3f, 0.3f, 0.32f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
 
-		paint(vgContext);
+		impl_->paintEvent(context);
 
 		// Swap buffers
-		glfwSwapBuffers(window_.get());
+		glfwSwapBuffers(impl_->window_.get());
 		glfwPollEvents();
 	}
 	return 0;
 }
 
-void Application::resizeWindow(GLFWwindow* window, int width, int height){
-	glViewport( 0, 0, (GLint) width, (GLint) height);
-	NVGcontext* vgContext = NVG::instance()->context();
-	glClearColor(0.3f, 0.3f, 0.32f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
 
-	app->paint(vgContext);
-
-	glfwSwapBuffers(window);
-}
-
-void Application::keyEvent(GLFWwindow* window, int key, int scancode, int action, int mods){
-
-	if (app->propagateKeyEvent(key,scancode,action,mods)) return;
-
-	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS){
-		glfwSetWindowShouldClose(window, GL_TRUE);
-	}
-}

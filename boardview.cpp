@@ -100,16 +100,3 @@ void BoardView::paint(NVGcontext* context, Rect rect)
 	}
 }
 
-bool BoardView::keyEvent(int key, int scancode, int action, int mods)
-{
-	if (action == GLFW_PRESS){
-		switch(key){
-			case GLFW_KEY_UP: impl_->board_->push(Board::TOP); return true;
-			case GLFW_KEY_DOWN: impl_->board_->push(Board::BOTTOM); return true;
-			case GLFW_KEY_LEFT: impl_->board_->push(Board::LEFT); return true;
-			case GLFW_KEY_RIGHT: impl_->board_->push(Board::RIGHT); return true;
-		}
-	}
-	return false;
-}
-

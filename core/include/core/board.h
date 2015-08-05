@@ -1,7 +1,7 @@
 #pragma once
 
 #include <memory>
-#include <list>
+#include <vector>
 
 class Board
 {
@@ -35,9 +35,11 @@ public:
 
 	bool isFull() const;
 
-	std::list<Pos> emptySquares() const;
+	bool hasChanged() const;
 
-	void push(Direction direction);
+	std::vector<Pos> emptySquares() const;
+
+	bool push(Direction direction);
 
 private:
 	class Impl_;

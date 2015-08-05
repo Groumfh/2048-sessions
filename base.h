@@ -4,7 +4,6 @@
 #include <assert.h>
 #include <iostream>
 
-
 struct Rect{
 	float x, y;
 	float width, height;
