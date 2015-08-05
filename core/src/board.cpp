@@ -30,23 +30,25 @@ void pushArray(ForwardIt itbegin, ForwardIt itEnd){
 	ForwardIt lastValue = itEnd;
 	ForwardIt it = itbegin;
 	for(; it != itEnd; it++){
+		// if it == 0, save the last empty position
 		if (*it == 0){
 			if (empty == itEnd) empty = it;
 		}
-		else if (empty != itEnd){
+		else {
 			typename ForwardIt::value_type res;
 			if (lastValue != itEnd && mergeCondition(*it,*lastValue,res)){
 				*lastValue = res;
 				*it = 0;
 				it = lastValue;
 			}
-			else{
+			else if (empty != itEnd){
 				*empty = *it;
 				*it = 0;
 				it = empty;
 				empty = itEnd;
 			}
 		}
+		// if it != 0, save the last value position
 		if (*it != 0){
 			lastValue = it;
 		}

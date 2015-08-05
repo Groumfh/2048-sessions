@@ -36,16 +36,22 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/src/glfw/include)
 
 # libaries ----------------------------------
 
-
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 add_subdirectory(core)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/core/include)
+
+# configure embedded resources path ----------
+set(RESOURCES_PATH "${CMAKE_CURRENT_SOURCE_DIR}/resources/")
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/resources/resources_path.h.in
+	${CMAKE_CURRENT_BINARY_DIR}/resources/resources_path.h)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/resources)
 
 set(SOURCES
 	main.cpp
 	application.cpp
 	nvg.cpp
 	glfw.cpp
+	boardview.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/third_party/nanovg/src/nanovg.c
 )
 

@@ -25,3 +25,9 @@ private:
 
 typedef SingletonHolder<NVG_> NVG;
 
+//overloaded functions to be used with a Rect
+
+NVGpaint nvgBoxGradient(NVGcontext *ctx, Rect rect, float r, float f, NVGcolor icol, NVGcolor ocol);
+void nvgRect(NVGcontext *ctx, Rect rect);
+void nvgRoundedRect(NVGcontext *ctx, Rect rect, float r);
+

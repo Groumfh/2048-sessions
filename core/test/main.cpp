@@ -142,8 +142,26 @@ TEST(board, pushTwoValues)
 
 TEST(board, mergeTwoValuesEqual)
 {
-	{
-		Board board(5,1);
+	{  // sticked
+		Board board(3,1);
+		const uint32_t value = 5;
+		const uint32_t total = 10;
+
+		board.setSquare(1,0,value);
+		board.setSquare(2,0,value);
+
+		EXPECT_EQ(board.square(0,0),0);
+		EXPECT_EQ(board.square(1,0),value);
+		EXPECT_EQ(board.square(2,0),value);
+
+		board.push(Board::RIGHT);
+
+		EXPECT_EQ(board.square(0,0),0);
+		EXPECT_EQ(board.square(1,0),0);
+		EXPECT_EQ(board.square(2,0),total);
+	}
+	{  // separated
+		Board board(4,1);
 		const uint32_t value = 5;
 		const uint32_t total = 10;
 
@@ -154,18 +172,16 @@ TEST(board, mergeTwoValuesEqual)
 		EXPECT_EQ(board.square(1,0),0);
 		EXPECT_EQ(board.square(2,0),value);
 		EXPECT_EQ(board.square(3,0),0);
-		EXPECT_EQ(board.square(4,0),0);
 
 		board.push(Board::RIGHT);
 
 		EXPECT_EQ(board.square(0,0),0);
 		EXPECT_EQ(board.square(1,0),0);
 		EXPECT_EQ(board.square(2,0),0);
-		EXPECT_EQ(board.square(3,0),0);
-		EXPECT_EQ(board.square(4,0),total);
+		EXPECT_EQ(board.square(3,0),total);
 	}
 
-	{
+	{ // two merges in one action
 		Board board(5,1);
 		const uint32_t value = 5;
 		const uint32_t total = 10;

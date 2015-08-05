@@ -4,6 +4,42 @@
 #include <assert.h>
 #include <iostream>
 
+
+struct Rect{
+	float x, y;
+	float width, height;
+
+	Rect(float x = 0,float y = 0, float width = 0, float height= 0)
+	{
+		this->x = x;
+		this->y = y;
+		this->width = width;
+		this->height = height;
+	}
+
+	void resize(float width,float height){
+		this->width = width;
+		this->height = height;
+	}
+
+	void move(float dx,float dy){
+		x += dx;
+		y += dy;
+	}
+
+	void center(float& x, float& y){
+		x = width/2 + this->x;
+		y = height/2 + this->y;
+	}
+};
+
+static Rect operator + (const Rect& lRect, const Rect& rRect){
+	return Rect(lRect.x + rRect.x,
+				lRect.y + rRect.y,
+				lRect.width + rRect.width,
+				lRect.height + rRect.height);
+}
+
 class non_copyable {
 public:
 	non_copyable() = default;

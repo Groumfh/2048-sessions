@@ -19,12 +19,15 @@ int main(int argc, char **argv){
 	if (!NVG::instance()->isInitialized()){
 		exit(-1);
 	}
+	if (!app.initGL()){
+		exit(-1);
+	}
 
 	int result = app.run();
 
 	NVG::stop();
 	GLFW::stop();
 
-	return result; // 24643257
+	return result; // 1011
 }
 

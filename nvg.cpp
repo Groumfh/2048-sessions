@@ -28,6 +28,19 @@ NVG_::NVG_():
 NVG_::~NVG_(){
 }
 
+
+NVGpaint nvgBoxGradient(NVGcontext* ctx, Rect rect, float r, float f, NVGcolor icol, NVGcolor ocol){
+	return nvgBoxGradient(ctx,rect.x,rect.y,rect.width,rect.height,r,f,icol,ocol);
+}
+
+void nvgRect(NVGcontext* ctx, Rect rect){
+	nvgRect(ctx,rect.x,rect.y,rect.width,rect.height);
+}
+
+void nvgRoundedRect(NVGcontext* ctx, Rect rect, float r){
+	nvgRoundedRect(ctx,rect.x,rect.y,rect.width,rect.height,r);
+}
+
 SINGLETON_HOLDER_IMPL(NVG)
 
 #define NANOVG_GL_IMPLEMENTATION
