@@ -47,7 +47,6 @@ public:
 
 		static std::default_random_engine generator;
 		std::uniform_int_distribution<int> distribution(50,255);
-		std::cout<< distribution(generator) << distribution(generator) << distribution(generator) << std::endl;
 		NVGcolor color = nvgRGBA(distribution(generator),distribution(generator),distribution(generator),255);
 		colors_[value] = color;
 		return color;
