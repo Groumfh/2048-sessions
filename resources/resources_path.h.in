@@ -2,3 +2,6 @@
 #include <string>
 
 const std::string RESOURCES_PATH("@RESOURCES_PATH@");
+
+#define RESOURCE_PATH(resourceName)\
+	(RESOURCES_PATH + resourceName)
