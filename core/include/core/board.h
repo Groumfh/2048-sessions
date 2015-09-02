@@ -8,8 +8,8 @@ class Board
 public:
 
 	enum Direction{
-		TOP     = 1,
-		BOTTOM  = 2,
+		UP      = 1,
+		DOWN    = 2,
 		LEFT    = 4,
 		RIGHT   = 8
 	};
@@ -34,8 +34,7 @@ public:
 	uint32_t width() const;
 
 	bool isFull() const;
-
-	bool hasChanged() const;
+	bool isMovable() const;
 
 	std::vector<Pos> emptySquares() const;
 

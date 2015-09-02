@@ -6,6 +6,21 @@
 #include <random>
 #include <map>
 
+namespace{
+
+void drawShadow(NVGcontext* context,Rect rect){
+
+	NVGpaint shadowPaint = nvgBoxGradient(context, rect + Rect(2,2,0,0), 5*2, 10, nvgRGBA(0,0,0,128), nvgRGBA(0,0,0,0));
+	nvgBeginPath(context);
+	nvgRect(context, rect + Rect(-10,-10,20,20));
+	nvgRoundedRect(context, rect, 5);
+	nvgPathWinding(context, NVG_HOLE);
+	nvgFillPaint(context, shadowPaint);
+	nvgFill(context);
+	nvgClosePath(context);
+}
+
+}
 
 class BoardView::Impl_ : public non_copyable
 {
@@ -20,10 +35,14 @@ public:
 		// draw text
 		if (squareValue != 0)
 		{
+			Rect squareRect = rect + Rect(4,4,-8,-8);
 			nvgBeginPath(context);
-			nvgRoundedRect(context,rect.x+4,rect.y+4, rect.width-8,rect.height-8, 5);
+			nvgRoundedRect(context,squareRect,5);
 			nvgFillColor(context, color(squareValue));
 			nvgFill(context);
+			nvgClosePath(context);
+
+			drawShadow(context,squareRect);
 
 			nvgBeginPath(context);
 			float x= 0;
@@ -34,6 +53,7 @@ public:
 			nvgTextAlign(context, NVG_ALIGN_MIDDLE|NVG_ALIGN_CENTER);
 			nvgFillColor(context, nvgRGBA(0,0,0,255));
 			nvgText(context,x,y,std::to_string(squareValue).c_str(),NULL);
+			nvgClosePath(context);
 		}
 
 	}
@@ -79,16 +99,9 @@ void BoardView::paint(NVGcontext* context, Rect rect)
 	nvgFill(context);
 
 	// draw his shadow
-	NVGpaint shadowPaint = nvgBoxGradient(context, rect + Rect(2,2,0,0), 5*2, 10, nvgRGBA(0,0,0,128), nvgRGBA(0,0,0,0));
-	nvgBeginPath(context);
-	nvgRect(context, rect + Rect(-10,-10,20,20));
-	nvgRoundedRect(context, rect, 5);
-	nvgPathWinding(context, NVG_HOLE);
-	nvgFillPaint(context, shadowPaint);
-	nvgFill(context);
+	drawShadow(context, rect);
 
 	// draw square
-
 	float squareWidth = boardRect.width /impl_->board_->width();
 	float squareHeight = boardRect.height /impl_->board_->height();
 
@@ -98,5 +111,6 @@ void BoardView::paint(NVGcontext* context, Rect rect)
 			impl_->drawSquare(context,i,j,Rect(boardRect.x+ squareWidth*i,boardRect.y+squareHeight*j,squareWidth,squareHeight));
 		}
 	}
+	nvgClosePath(context);
 }
 

@@ -94,7 +94,7 @@ TEST(board, pushOneValue)
 	EXPECT_EQ(board.square(2,2),0);
 	EXPECT_EQ(board.square(0,2),0);
 
-	EXPECT_TRUE(board.push(Board::BOTTOM));
+	EXPECT_TRUE(board.push(Board::DOWN));
 
 	EXPECT_EQ(board.square(0,0),0);
 	EXPECT_EQ(board.square(2,0),0);
@@ -108,7 +108,7 @@ TEST(board, pushOneValue)
 	EXPECT_EQ(board.square(2,2),0);
 	EXPECT_EQ(board.square(0,2),value);
 
-	EXPECT_TRUE(board.push(Board::TOP));
+	EXPECT_TRUE(board.push(Board::UP));
 
 	EXPECT_EQ(board.square(0,0),value);
 	EXPECT_EQ(board.square(0,2),0);
@@ -227,7 +227,23 @@ TEST(board, mergeTwoValuesEqual)
 	}
 }
 
-
+TEST(board, movable)
+{
+	{ // empty board
+		Board board(2,2);
+		EXPECT_FALSE(board.isMovable());
+	}
+	{ // full board
+		Board board(2,2);
+		board.setSquare(0,0, 32);
+		board.setSquare(1,0, 43);
+		board.setSquare(1,1, 58);
+		board.setSquare(0,1, 97);
+		EXPECT_FALSE(board.isMovable());
+		board.setSquare(0,0, 43);
+		EXPECT_TRUE(board.isMovable());
+	}
+}
 
 int main(int argc, char **argv)
 {

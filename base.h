@@ -30,6 +30,8 @@ struct Rect{
 		x = width/2 + this->x;
 		y = height/2 + this->y;
 	}
+
+
 };
 
 static Rect operator + (const Rect& lRect, const Rect& rRect){
@@ -37,6 +39,11 @@ static Rect operator + (const Rect& lRect, const Rect& rRect){
 				lRect.y + rRect.y,
 				lRect.width + rRect.width,
 				lRect.height + rRect.height);
+}
+
+
+static std::ostream& operator << (std::ostream& stream, const Rect& rect){
+	return stream << "Rect ("<<rect.x <<" "<<rect.y<<") ["<<rect.width <<" "<<rect.height<<"]";
 }
 
 class non_copyable {

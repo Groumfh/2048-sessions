@@ -24,6 +24,7 @@ public:
 	std::unique_ptr<GLFWwindow,void(*)(GLFWwindow*)> window_;
 	std::unique_ptr<Board> board_;
 	std::unique_ptr<BoardView> boardView_;
+	bool isEnd_;
 
 	static void resizeCallback(GLFWwindow* window, int width, int height);
 	static void keyCallBack(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -36,7 +37,8 @@ public:
 
 Application::Impl_::Impl_():
 	window_(glfwCreateWindow( 300, 300, "2048", NULL, NULL),glfwDestroyWindow),
-	board_(new Board(4,4))
+	board_(new Board(4,4)),
+	isEnd_(false)
 {
 }
 
@@ -62,15 +64,52 @@ void Application::Impl_::paintEvent(NVGcontext* context){
 	glfwGetFramebufferSize(window_.get(), &width, &height);
 	nvgBeginFrame(context, width, height, pxRatio);
 
-	int sizemin = std::min(width,height);
-	Rect region(20,20,sizemin-40, sizemin-40);
-	if (width < height){
-		region.move(0,(height - width)/2.f);
+	Rect textRect(0.f,10.f,width,20.f);
+	Rect boardMaxRect(0.f,textRect.height + textRect.y,width,height - textRect.height);
+
+	float boardSizeMin = std::min(boardMaxRect.width,boardMaxRect.height);
+	Rect boardRect(20.f, 20.f + textRect.height,boardSizeMin-40.f, boardSizeMin-40.f);
+
+	if (boardMaxRect.height > boardMaxRect.width){
+		boardRect.move(0,(boardMaxRect.height - boardMaxRect.width)/2.f);
 	}else{
-		region.move((width - height)/2.f,0);
+		boardRect.move((boardMaxRect.width - boardMaxRect.height)/2.f,0);
 	}
 
-	boardView_->paint(context,region);
+	// draw the text rect
+	nvgBeginPath(context);
+	nvgFillColor(context, nvgRGBA(0,0,0,50));
+	nvgRect(context,textRect);
+	nvgFill(context);
+	nvgClosePath(context);
+
+	// draw the board
+	boardView_->paint(context,boardRect);
+
+	if (isEnd_){
+
+		// change the color of the board
+		nvgBeginPath(context);
+		nvgFillColor(context, nvgRGBA(0,0,0,30));
+		nvgRect(context,boardMaxRect);
+		nvgFill(context);
+		nvgClosePath(context);
+
+		// & display the game over
+		std::string text("GAME OVER");
+		nvgBeginPath(context);
+		float x= 0;
+		float y= 0;
+		textRect.center(x,y);
+		nvgFontSize(context, 20);
+		nvgFontFace(context, "sans");
+		nvgTextAlign(context, NVG_ALIGN_MIDDLE|NVG_ALIGN_CENTER);
+		nvgFill(context);
+		nvgFillColor(context, nvgRGBA(0,0,0,255));
+		nvgText(context,x+1,y+1,text.c_str(),NULL);
+		nvgFillColor(context, nvgRGBA(200,20,20,255));
+		nvgText(context,x,y,text.c_str(),NULL);
+	}
 
 	nvgEndFrame(context);
 }
@@ -79,19 +118,18 @@ void Application::Impl_::keyEvent(int key, int scancode, int action, int mods){
 
 	if (action == GLFW_PRESS){
 		switch(key){
-			case GLFW_KEY_UP: pushOnBoard(Board::TOP); return;
-			case GLFW_KEY_DOWN: pushOnBoard(Board::BOTTOM); return;
+			case GLFW_KEY_UP: pushOnBoard(Board::UP); return;
+			case GLFW_KEY_DOWN: pushOnBoard(Board::DOWN); return;
 			case GLFW_KEY_LEFT: pushOnBoard(Board::LEFT); return;
 			case GLFW_KEY_RIGHT: pushOnBoard(Board::RIGHT); return;
+			case GLFW_KEY_ESCAPE: glfwSetWindowShouldClose(window_.get(), GL_TRUE); return;
 		}
-	}
-
-	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS){
-		glfwSetWindowShouldClose(window_.get(), GL_TRUE);
 	}
 }
 
 void Application::Impl_::pushOnBoard(Board::Direction direction){
+	if (isEnd_) return;
+
 	if (board_->push(direction)){
 		// generate a random square
 		std::vector<Board::Pos> squares = board_->emptySquares();
@@ -108,9 +146,9 @@ Application::Application(int argc, char** argv):
 	impl_(new Impl_){
 
 	impl_->board_->setSquare(0,0,4);
-	impl_->board_->setSquare(0,3,8);
-	impl_->board_->setSquare(1,2,2);
-	impl_->board_->setSquare(3,2,2);
+//	impl_->board_->setSquare(0,3,8);
+//	impl_->board_->setSquare(1,2,2);
+//	impl_->board_->setSquare(3,2,2);
 
 	assert(app == NULL);
 	app = this;
@@ -160,6 +198,11 @@ int Application::run()
 		// Swap buffers
 		glfwSwapBuffers(impl_->window_.get());
 		glfwPollEvents();
+
+		// test if end is occured
+		if (!impl_->board_->isMovable() && !impl_->isEnd_){
+			impl_->isEnd_ = true;
+		}
 	}
 	return 0;
 }
