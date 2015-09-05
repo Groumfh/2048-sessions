@@ -1,8 +1,7 @@
 #include "nvg.h"
 
-#include <GL\glew.h>
-
-#include <GLFW\glfw3.h>
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
 #define NANOVG_GL2
 #include <nanovg_gl.h>
@@ -18,7 +17,7 @@ NVGcontext*NVG_::context() const {
 NVG_::NVG_():
 	isInitialized_(false),
 	vg_(nvgCreateGL2(NVG_ANTIALIAS | NVG_STENCIL_STROKES | NVG_DEBUG),nvgDeleteGL2){
-	
+
 	if (vg_ == NULL) {
 		printf("Could not init nanovg.\n");
 		return;
