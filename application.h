@@ -2,11 +2,6 @@
 
 #include "base.h"
 
-class GLFWwindow;
-class Board;
-class BoardView;
-class NVGcontext;
-
 class Application
 {
 public:

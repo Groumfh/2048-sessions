@@ -1,7 +1,6 @@
 #pragma once
 
 #include <base.h>
-
 #include <nanovg.h>
 
 class NVG_ : public non_copyable

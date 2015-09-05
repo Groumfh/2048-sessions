@@ -1,10 +1,11 @@
 #include "nvg.h"
 
-#include <OPENGL/gl.h>
+#include <GL\glew.h>
+
+#include <GLFW\glfw3.h>
 
 #define NANOVG_GL2
 #include <nanovg_gl.h>
-
 
 bool NVG_::isInitialized() const {
 	return isInitialized_;
@@ -17,7 +18,7 @@ NVGcontext*NVG_::context() const {
 NVG_::NVG_():
 	isInitialized_(false),
 	vg_(nvgCreateGL2(NVG_ANTIALIAS | NVG_STENCIL_STROKES | NVG_DEBUG),nvgDeleteGL2){
-
+	
 	if (vg_ == NULL) {
 		printf("Could not init nanovg.\n");
 		return;
@@ -27,7 +28,6 @@ NVG_::NVG_():
 
 NVG_::~NVG_(){
 }
-
 
 NVGpaint nvgBoxGradient(NVGcontext* ctx, Rect rect, float r, float f, NVGcolor icol, NVGcolor ocol){
 	return nvgBoxGradient(ctx,rect.x,rect.y,rect.width,rect.height,r,f,icol,ocol);

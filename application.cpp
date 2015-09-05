@@ -1,11 +1,13 @@
 #include "application.h"
+
 #include <core/board.h>
 #include "boardview.h"
-
-#include <GLFW/glfw3.h>
 #include "nvg.h"
 
+#include <GLFW/glfw3.h>
+
 #include <random>
+#include <algorithm> 
 
 #include <resources_path.h>
 

@@ -4,7 +4,7 @@
 
 class Board;
 
-class NVGcontext;
+struct NVGcontext;
 
 class BoardView
 {

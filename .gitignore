@@ -27,3 +27,9 @@
 *.out
 *.app
 *txt.user
+2048-sessions.dir/
+2048-sessions.opensdf
+*.filters
+*.vcxproj
+*.stamp
+*.tlog

@@ -1,10 +1,13 @@
 #include "boardview.h"
 
-#include <GLFW/glfw3.h>
 #include <nvg.h>
+#include <GLFW/glfw3.h>
+
 #include <core/board.h>
 #include <random>
 #include <map>
+#include <algorithm>
+#include <string>
 
 namespace{
 

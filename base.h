@@ -1,6 +1,6 @@
 #pragma once
 
-#include <memory.h>
+#include <memory>
 #include <assert.h>
 #include <iostream>
 

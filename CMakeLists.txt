@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 2.8.8)
 
 project(2048-sessions)
 
-# activate C++ 11 fetaures
+# activate C++ 11 features
 list( APPEND CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS} -g")
 
 set(CMAKE_MODULE_PATH
@@ -13,6 +13,8 @@ set(CMAKE_MODULE_PATH
   ${CMAKE_MODULE_PATH})
 
 # third parties -------------------------------
+
+find_package(OpenGL REQUIRED)
 
 #gtest
 # TODO set a find package for gtest and build it in this repository
@@ -34,6 +36,11 @@ set(GLFW_BUILD_EXAMPLES OFF)
 add_subdirectory(third_party/src/glfw)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/src/glfw/include)
 
+# glew
+add_definitions(-DGLEW_STATIC)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/glew-1.13.0/include)
+link_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/glew-1.13.0/lib/Release/x64)
+
 # libaries ----------------------------------
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
@@ -50,11 +57,19 @@ set(SOURCES
 	main.cpp
 	application.cpp
 	nvg.cpp
-	glfw.cpp
+	glfw.cpp	
 	boardview.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/third_party/nanovg/src/nanovg.c
-)
+	${CMAKE_CURRENT_SOURCE_DIR}/third_party/glew-1.13.0/src/glew.c
+	${CMAKE_CURRENT_SOURCE_DIR}/third_party/nanovg/src/nanovg.c)
 
 add_executable(2048-sessions ${SOURCES})
-target_link_libraries(2048-sessions core)
-target_link_libraries(2048-sessions glfw ${GLFW_LIBRARIES})
+
+target_link_libraries(2048-sessions 
+	core
+	glfw
+	${OPENGL_LIBRARIES}
+	${GLFW_LIBRARIES}
+	${GLEW_LIBRARY})
+
+target_link_libraries (2048-sessions 
+    ${OPENGL_LIBRARIES} glu32 opengl32)
