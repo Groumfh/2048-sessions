@@ -20,10 +20,12 @@ find_package(OpenGL REQUIRED)
 set(GTEST_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gtest/include)
 if(APPLE)
 	set(GTEST_LIBRARIES
-		${CMAKE_CURRENT_SOURCE_DIR}/third_party/gtest/lib/libgtest_main.a
-		${CMAKE_CURRENT_SOURCE_DIR}/third_party/gtest/lib/libgtest.a)
+		${CMAKE_CURRENT_SOURCE_DIR}/third_party/gtest/lib/release/libgtest_main.a
+		${CMAKE_CURRENT_SOURCE_DIR}/third_party/gtest/lib/release/libgtest.a)
 elseif(WIN32)
-
+	set(GTEST_LIBRARIES
+		${CMAKE_CURRENT_SOURCE_DIR}/third_party/gtest/lib/debug/gtest_main.lib
+		${CMAKE_CURRENT_SOURCE_DIR}/third_party/gtest/lib/debug/gtest.lib)
 endif(WIN32)
 include_directories(${GTEST_INCLUDE_DIRS})
 
