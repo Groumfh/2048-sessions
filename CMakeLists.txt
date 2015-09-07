@@ -41,7 +41,9 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/glfw/include)
 # glew
 add_definitions(-DGLEW_STATIC)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/glew-1.13.0/include)
-link_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/glew-1.13.0/lib/Release/x64)
+if(WIN32)
+	link_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/glew-1.13.0/lib/Release/x64)
+endif(WIN32)
 
 # libaries ----------------------------------
 
@@ -74,5 +76,9 @@ target_link_libraries(2048-sessions
 	${GLEW_LIBRARY})
 
 if(WIN32)
-	target_link_libraries (2048-sessions glu32 opengl32)
+	target_link_libraries(2048-sessions glu32 opengl32)
 endif(WIN32)
+
+#Exercises
+add_subdirectory(exercises/ex1)
+add_subdirectory(exercises/ex2)

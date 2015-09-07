@@ -38,7 +38,8 @@ public:
 		// draw text
 		if (squareValue != 0)
 		{
-			Rect squareRect = rect + Rect(4,4,-8,-8);
+			Rect squareRect = rect;
+			squareRect.addMargin(4);
 			nvgBeginPath(context);
 			nvgRoundedRect(context,squareRect,5);
 			nvgFillColor(context, color(squareValue));
@@ -63,8 +64,7 @@ public:
 
 	NVGcolor color(int value){
 		std::map<int,NVGcolor>::iterator it = colors_.find(value);
-		if (it != colors_.end())
-		{
+		if (it != colors_.end()){
 			return it->second;
 		}
 
@@ -91,7 +91,9 @@ BoardView::~BoardView()
 
 void BoardView::paint(NVGcontext* context, Rect rect)
 {
-	Rect boardRect = rect + Rect(10,10,-20,-20);
+	Rect boardRect = rect;
+	float boardMargin = 10;
+	boardRect.addMargin(boardMargin);
 
 	// draw border of board rect
 	nvgBeginPath(context);
@@ -104,11 +106,10 @@ void BoardView::paint(NVGcontext* context, Rect rect)
 	// draw his shadow
 	drawShadow(context, rect);
 
-	// draw square
 	float squareWidth = boardRect.width /impl_->board_->width();
 	float squareHeight = boardRect.height /impl_->board_->height();
 
-	// draw board
+	// draw squares
 	for (uint32_t i = 0; i < impl_->board_->width(); i++){
 		for (uint32_t j = 0; j < impl_->board_->height(); j++){
 			impl_->drawSquare(context,i,j,Rect(boardRect.x+ squareWidth*i,boardRect.y+squareHeight*j,squareWidth,squareHeight));

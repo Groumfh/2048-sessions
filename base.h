@@ -31,7 +31,13 @@ struct Rect{
 		y = height/2 + this->y;
 	}
 
-
+	void addMargin(float margin)
+	{
+		x += margin;
+		y += margin;
+		width -= 2*margin;
+		height -= 2*margin;
+	}
 };
 
 static Rect operator + (const Rect& lRect, const Rect& rRect){
