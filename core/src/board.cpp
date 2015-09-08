@@ -1,4 +1,4 @@
-#include "core/board.h"
+#include <core/board.h>
 
 #include <vector>
 #include <exception>
@@ -13,7 +13,7 @@ enum Axe{
 	AXE_HORIZONTAL = Board::LEFT|Board::RIGHT
 };
 
-typedef std::vector<uint32_t> Array;
+typedef std::vector<Board::ContentValue> Array;
 
 template <class Type>
 bool mergeCondition(Type lValue, Type rValue, Type & res){
@@ -24,35 +24,62 @@ bool mergeCondition(Type lValue, Type rValue, Type & res){
 	return false;
 }
 
-template <class ForwardIt>
-void pushArray(ForwardIt itbegin, ForwardIt itEnd, bool& hasChanged){
-	ForwardIt empty = itEnd;
-	ForwardIt lastValue = itEnd;
-	ForwardIt it = itbegin;
-	for(; it != itEnd; it++){
-		// if it == 0, save the last empty position
-		if (*it == 0){
-			if (empty == itEnd) empty = it;
+bool squareIsEmpty(const Board::ContentValue& value){
+	return value == 0;
+}
+
+void resetSquare(Board::ContentValue& value){
+	value = 0;
+}
+
+//
+
+void pushArray(Array& array, bool& hasChanged){
+	Array::reverse_iterator emptyPos = array.rend();
+	Array::reverse_iterator lastValuePos = array.rend();
+	Array::reverse_iterator it = array.rbegin();
+
+	for(; it != array.rend(); it++){
+		// if current is empty and no empty position has been already defined,
+		// save this position
+		if (squareIsEmpty(*it)){
+			if (emptyPos == array.rend()){
+				emptyPos = it;
+			}
 		}
 		else {
-			typename ForwardIt::value_type res;
-			if (lastValue != itEnd && mergeCondition(*it,*lastValue,res)){
-				*lastValue = res;
-				*it = 0;
-				it = lastValue;
+			Board::ContentValue res;
+			// Current has a value
+			// try to merge it with the last value met
+			if (lastValuePos != array.rend() && mergeCondition(*it,*lastValuePos,res)){
+				// let's do the merge
+				*lastValuePos = res;
+				resetSquare(*it);
 				hasChanged = true;
+
+				// Change the current
+				it = lastValuePos;
+				// and reset lastValuePos (we don't want merge this new square)
+				lastValuePos = array.rend();
 			}
-			else if (empty != itEnd){
-				*empty = *it;
-				*it = 0;
-				it = empty;
-				empty = itEnd;
+			else if (emptyPos != array.rend()){
+				// an empty pos is under the current
+				// switch current to this empty pos
+				*emptyPos = *it;
+				resetSquare(*it);
 				hasChanged = true;
+
+				// Change the current
+				it = emptyPos;
+				// this pos become the last value pos
+				lastValuePos = it;
+				// reset empty pos
+				emptyPos = array.rend();
 			}
-		}
-		// if it != 0, save the last value position
-		if (*it != 0){
-			lastValue = it;
+			else{
+				lastValuePos = it;
+			}
+
 		}
 	}
 }
@@ -65,62 +92,65 @@ void pushArray(ForwardIt itbegin, ForwardIt itEnd, bool& hasChanged){
 class Board::Impl_ : public non_copyable{
 public:
 
-	Impl_();
-	std::vector<std::vector<uint32_t> > values_;
+	Impl_(uint32_t width, uint32_t height);
 
+	std::vector<std::vector<Board::ContentValue> > values_;
 	uint32_t width_;
 	uint32_t height_;
 
-	void init(uint32_t width, uint32_t height);
-
-	Array getArray(Axe axe, uint32_t index) const;
-	void setArray(Axe axe, uint32_t index, Array& data);
+	Array getArray(Board::Direction direction, uint32_t index) const;
+	void setArray(Board::Direction direction, uint32_t index, Array& data);
 
 	bool testAndPush(Board::Direction direction, bool apply = true);
 };
 
-Board::Impl_::Impl_():
-	width_(0),
-	height_(0){
-}
+Board::Impl_::Impl_(uint32_t width, uint32_t height):
+	width_(width),
+	height_(height){
 
-void Board::Impl_::init(uint32_t width, uint32_t height){
-	height_ = height;
-	width_ = width;
 	values_.resize(width);
-	for (std::vector<uint32_t>& subValue : values_) {
+	for (std::vector<Board::ContentValue>& subValue : values_) {
 		subValue.resize(height,0u);
 	}
 }
 
-Array Board::Impl_::getArray(Axe axe, uint32_t index) const{
-	if (axe == AXE_VERTICAL){
+Array Board::Impl_::getArray(Board::Direction direction, uint32_t index) const{
+
+	Array data;
+	if (direction & AXE_VERTICAL){
 		ENSURE_ACCESS_VALID(this,index,0);
-		Array data (height_);
-		for (uint32_t i = 0; i < height_; i++)
-			data[i] = values_[index][i];
-		return data;
+		data.resize(height_);
+		for (uint32_t i = 0; i < height_; i++){
+			uint32_t writeIndex = (direction == Board::DOWN) ? i : height_ - i - 1;
+			data[writeIndex] = values_[index][i];
+		}
 	}
 	else{
 		ENSURE_ACCESS_VALID(this,0,index);
-		Array data (width_);
-		for (uint32_t i = 0; i < width_; i++)
-			data[i] = values_[i][index];
-		return data;
+		data.resize(width_);
+		for (uint32_t i = 0; i < width_; i++){
+			uint32_t writeIndex = (direction == Board::RIGHT) ? i : width_ - i - 1;
+			data[writeIndex] = values_[i][index];
+		}
 	}
+	return data;
 }
 
-void Board::Impl_::setArray(Axe axe, uint32_t index, Array& data)
+void Board::Impl_::setArray(Board::Direction direction, uint32_t index, Array& data)
 {
-	if (axe == AXE_VERTICAL){
+	if (direction & AXE_VERTICAL){
 		assert(data.size() == height_);
-		for (uint32_t i = 0; i < height_; i++)
-			values_[index][i] = data[i];
+		for (uint32_t i = 0; i < height_; i++){
+			uint32_t readIndex = (direction == Board::DOWN) ? i : height_ - i - 1;
+			values_[index][i] = data[readIndex];
+		}
 	}
 	else{
 		assert(data.size() == width_);
-		for (uint32_t i = 0; i < width_; i++)
-			values_[i][index] = data[i];
+		for (uint32_t i = 0; i < width_; i++){
+			uint32_t readIndex = (direction == Board::RIGHT) ? i : width_ - i - 1;
+			values_[i][index] = data[readIndex];
+		}
 	}
 }
 
@@ -129,30 +159,16 @@ bool Board::Impl_::testAndPush(Board::Direction direction,bool apply)
 	bool stateChanged = false;
 	if (direction & AXE_HORIZONTAL && width_ > 1){
 		for (int i = 0; i < height_; i++){
-			Array array = getArray(AXE_HORIZONTAL,i);
-			if (direction == Board::LEFT){
-				pushArray(array.begin(),array.end(),stateChanged);
-			}
-			else {
-				pushArray(array.rbegin(),array.rend(),stateChanged);
-			}
-			if (apply){
-				setArray(AXE_HORIZONTAL,i,array);
-			}
+			Array array = getArray(direction,i);
+			pushArray(array,stateChanged);
+			if (apply) setArray(direction,i,array);
 		}
 	}
 	else if (direction & AXE_VERTICAL && height_ > 1){
 		for (int i = 0;i < width_; i++){
-			Array array = getArray(AXE_VERTICAL,i);
-			if (direction == Board::UP){
-				pushArray(array.begin(),array.end(),stateChanged);
-			}
-			else {
-				pushArray(array.rbegin(),array.rend(),stateChanged);
-			}
-			if (apply){
-				setArray(AXE_VERTICAL,i,array);
-			}
+			Array array = getArray(direction,i);
+			pushArray(array,stateChanged);
+			if (apply) setArray(direction,i,array);
 		}
 	}
 	return stateChanged;
@@ -160,9 +176,7 @@ bool Board::Impl_::testAndPush(Board::Direction direction,bool apply)
 
 
 Board::Board(uint32_t width, uint32_t height):
-	impl_(new Impl_)
-{
-	impl_->init(width,height);
+	impl_(new Impl_(width,height)){
 }
 
 Board::~Board(){
@@ -180,12 +194,12 @@ bool Board::push(Board::Direction direction){
 	return impl_->testAndPush(direction);
 }
 
-uint32_t Board::square(uint32_t x, uint32_t y){
+Board::ContentValue Board::square(uint32_t x, uint32_t y){
 	ENSURE_ACCESS_VALID(impl_,x,y);
 	return impl_->values_[x][y];
 }
 
-void Board::setSquare(uint32_t x, uint32_t y, uint32_t value){
+void Board::setSquare(uint32_t x, uint32_t y, ContentValue value){
 	ENSURE_ACCESS_VALID(impl_,x,y);
 	impl_->values_[x][y] = value;
 }

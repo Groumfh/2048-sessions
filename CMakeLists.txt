@@ -26,7 +26,7 @@ elseif(WIN32)
 	set(GTEST_LIBRARIES
 		${CMAKE_CURRENT_SOURCE_DIR}/third_party/gtest/lib/debug/gtest_main.lib
 		${CMAKE_CURRENT_SOURCE_DIR}/third_party/gtest/lib/debug/gtest.lib)
-endif(WIN32)
+endif(APPLE)
 include_directories(${GTEST_INCLUDE_DIRS})
 
 # nanovg

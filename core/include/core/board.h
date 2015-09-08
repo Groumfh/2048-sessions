@@ -24,11 +24,13 @@ public:
 		}
 	};
 
+	typedef uint32_t ContentValue;
+
 	Board(uint32_t width, uint32_t height);
 	~Board();
 
-	uint32_t square(uint32_t x, uint32_t y);
-	void setSquare(uint32_t x, uint32_t y, uint32_t value);
+	ContentValue square(uint32_t x, uint32_t y);
+	void setSquare(uint32_t x, uint32_t y, ContentValue value);
 
 	uint32_t height() const;
 	uint32_t width() const;

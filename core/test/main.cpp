@@ -6,27 +6,27 @@ TEST(board, init)
 	{
 		Board board(0,0);
 
-		EXPECT_EQ(board.width(),0);
-		EXPECT_EQ(board.height(),0);
+		EXPECT_EQ(0,board.width());
+		EXPECT_EQ(0,board.height());
 		EXPECT_ANY_THROW(board.square(1,1));
 	}
 
 	{
 		Board board(1,2);
 
-		EXPECT_EQ(board.width(),1);
-		EXPECT_EQ(board.height(),2);
+		EXPECT_EQ(1,board.width());
+		EXPECT_EQ(2,board.height());
 		EXPECT_NO_THROW(board.square(0,1));
-		EXPECT_EQ(board.square(0,1),0);
+		EXPECT_EQ(0,board.square(0,1));
 	}
 
 	{
 		Board board(5,5);
-		EXPECT_EQ(board.width(),5);
-		EXPECT_EQ(board.height(),5);
+		EXPECT_EQ(5,board.width());
+		EXPECT_EQ(5,board.height());
 		for (int i = 0; i < board.width(); i++){
 			for (int j = 0; j < board.height(); j++){
-				EXPECT_EQ(board.square(i,j),0);
+				EXPECT_EQ(0,board.square(i,j));
 			}
 		}
 	}
@@ -37,11 +37,11 @@ TEST(board, setValue)
 	Board board(3,3);
 	uint32_t res = 0;
 	EXPECT_NO_THROW(res = board.square(1,1));
-	EXPECT_EQ(res,0);
+	EXPECT_EQ(0,res);
 	const uint32_t valueSet = 5;
 	EXPECT_ANY_THROW(board.setSquare(20,20,valueSet));
 	EXPECT_NO_THROW(board.setSquare(1,1,valueSet));
-	EXPECT_EQ(board.square(1,1),valueSet);
+	EXPECT_EQ(valueSet,board.square(1,1));
 }
 
 
@@ -51,7 +51,7 @@ TEST(board, isFull)
 	EXPECT_TRUE(Board(0,0).emptySquares().empty());
 	EXPECT_FALSE(Board(1,1).isFull());
 	EXPECT_FALSE(Board(1,1).emptySquares().empty());
-	EXPECT_EQ(Board(1,1).emptySquares().front(),Board::Pos(0,0));
+	EXPECT_EQ(Board::Pos(0,0),Board(1,1).emptySquares().front());
 	{
 		Board board(1,1);
 		board.setSquare(0,0,10);
@@ -68,7 +68,7 @@ TEST(board, isFull)
 			}
 		}
 		EXPECT_FALSE(board.isFull());
-		EXPECT_EQ(board.emptySquares().front(),Board::Pos(0,0));
+		EXPECT_EQ(Board::Pos(0,0),board.emptySquares().front());
 		board.setSquare(0,0,10);
 		EXPECT_TRUE(board.isFull());
 		EXPECT_TRUE(board.emptySquares().empty());
@@ -82,38 +82,38 @@ TEST(board, pushOneValue)
 
 	board.setSquare(0,0,value);
 
-	EXPECT_EQ(board.square(0,0),value);
-	EXPECT_EQ(board.square(0,2),0);
-	EXPECT_EQ(board.square(2,2),0);
-	EXPECT_EQ(board.square(2,0),0);
+	EXPECT_EQ(value,board.square(0,0));
+	EXPECT_EQ(0,	board.square(0,2));
+	EXPECT_EQ(0,	board.square(2,2));
+	EXPECT_EQ(0,	board.square(2,0));
 
 	EXPECT_TRUE(board.push(Board::RIGHT));
 
-	EXPECT_EQ(board.square(0,0),0);
-	EXPECT_EQ(board.square(2,0),value);
-	EXPECT_EQ(board.square(2,2),0);
-	EXPECT_EQ(board.square(0,2),0);
+	EXPECT_EQ(0,	board.square(0,0));
+	EXPECT_EQ(value,board.square(2,0));
+	EXPECT_EQ(0,	board.square(2,2));
+	EXPECT_EQ(0,	board.square(0,2));
 
 	EXPECT_TRUE(board.push(Board::DOWN));
 
-	EXPECT_EQ(board.square(0,0),0);
-	EXPECT_EQ(board.square(2,0),0);
-	EXPECT_EQ(board.square(2,2),value);
-	EXPECT_EQ(board.square(0,2),0);
+	EXPECT_EQ(0,	board.square(0,0));
+	EXPECT_EQ(0,	board.square(2,0));
+	EXPECT_EQ(value,board.square(2,2));
+	EXPECT_EQ(0,	board.square(0,2));
 
 	EXPECT_TRUE(board.push(Board::LEFT));
 
-	EXPECT_EQ(board.square(0,0),0);
-	EXPECT_EQ(board.square(2,0),0);
-	EXPECT_EQ(board.square(2,2),0);
-	EXPECT_EQ(board.square(0,2),value);
+	EXPECT_EQ(0,	board.square(0,0));
+	EXPECT_EQ(0,	board.square(2,0));
+	EXPECT_EQ(0,	board.square(2,2));
+	EXPECT_EQ(value,board.square(0,2));
 
 	EXPECT_TRUE(board.push(Board::UP));
 
-	EXPECT_EQ(board.square(0,0),value);
-	EXPECT_EQ(board.square(0,2),0);
-	EXPECT_EQ(board.square(2,2),0);
-	EXPECT_EQ(board.square(2,0),0);
+	EXPECT_EQ(value,board.square(0,0));
+	EXPECT_EQ(0,	board.square(0,2));
+	EXPECT_EQ(0,	board.square(2,2));
+	EXPECT_EQ(0,	board.square(2,0));
 }
 
 TEST(board, pushtest)
@@ -123,15 +123,15 @@ TEST(board, pushtest)
 
 	board.setSquare(2,0,value);
 
-	EXPECT_EQ(board.square(0,0),0);
-	EXPECT_EQ(board.square(1,0),0);
-	EXPECT_EQ(board.square(2,0),value);
+	EXPECT_EQ(0,	board.square(0,0));
+	EXPECT_EQ(0,	board.square(1,0));
+	EXPECT_EQ(value,board.square(2,0));
 
 	EXPECT_FALSE(board.push(Board::RIGHT));
 
-	EXPECT_EQ(board.square(0,0),0);
-	EXPECT_EQ(board.square(1,0),0);
-	EXPECT_EQ(board.square(2,0),value);
+	EXPECT_EQ(0,	board.square(0,0));
+	EXPECT_EQ(0,	board.square(1,0));
+	EXPECT_EQ(value,board.square(2,0));
 }
 
 TEST(board, pushTwoValues)
@@ -143,88 +143,111 @@ TEST(board, pushTwoValues)
 	board.setSquare(0,0,value);
 	board.setSquare(2,0,value2);
 
-	EXPECT_EQ(board.square(0,0),value);
-	EXPECT_EQ(board.square(1,0),0);
-	EXPECT_EQ(board.square(2,0),value2);
-	EXPECT_EQ(board.square(3,0),0);
-	EXPECT_EQ(board.square(4,0),0);
+	EXPECT_EQ(value,board.square(0,0));
+	EXPECT_EQ(0,	board.square(1,0));
+	EXPECT_EQ(value2,board.square(2,0));
+	EXPECT_EQ(0,	board.square(3,0));
+	EXPECT_EQ(0,	board.square(4,0));
 
 	EXPECT_TRUE(board.push(Board::RIGHT));
 
-	EXPECT_EQ(board.square(0,0),0);
-	EXPECT_EQ(board.square(1,0),0);
-	EXPECT_EQ(board.square(2,0),0);
-	EXPECT_EQ(board.square(3,0),value);
-	EXPECT_EQ(board.square(4,0),value2);
+	EXPECT_EQ(0,	board.square(0,0));
+	EXPECT_EQ(0,	board.square(1,0));
+	EXPECT_EQ(0,	board.square(2,0));
+	EXPECT_EQ(value,board.square(3,0));
+	EXPECT_EQ(value2,board.square(4,0));
 
 	EXPECT_FALSE(board.push(Board::RIGHT));
 }
 
-TEST(board, mergeTwoValuesEqual)
+TEST(board, mergeTwoValuesEqualSticked)
 {
-	{  // sticked
-		Board board(3,1);
-		const uint32_t value = 5;
-		const uint32_t total = 10;
+	Board board(3,1);
+	const uint32_t value = 5;
+	const uint32_t total = 10;
 
-		board.setSquare(1,0,value);
-		board.setSquare(2,0,value);
+	board.setSquare(1,0,value);
+	board.setSquare(2,0,value);
 
-		EXPECT_EQ(board.square(0,0),0);
-		EXPECT_EQ(board.square(1,0),value);
-		EXPECT_EQ(board.square(2,0),value);
+	EXPECT_EQ(0,		board.square(0,0));
+	EXPECT_EQ(value,	board.square(1,0));
+	EXPECT_EQ(value,	board.square(2,0));
 
-		EXPECT_TRUE(board.push(Board::RIGHT));
+	EXPECT_TRUE(board.push(Board::RIGHT));
 
-		EXPECT_EQ(board.square(0,0),0);
-		EXPECT_EQ(board.square(1,0),0);
-		EXPECT_EQ(board.square(2,0),total);
-	}
-	{  // separated
-		Board board(4,1);
-		const uint32_t value = 5;
-		const uint32_t total = 10;
+	EXPECT_EQ(0,		board.square(0,0));
+	EXPECT_EQ(0,		board.square(1,0));
+	EXPECT_EQ(total,	board.square(2,0));
+}
 
-		board.setSquare(0,0,value);
-		board.setSquare(2,0,value);
+TEST(board, mergeTwoValuesEqualSeparated)
+{
+	Board board(4,1);
+	const uint32_t value = 5;
+	const uint32_t total = 10;
 
-		EXPECT_EQ(board.square(0,0),value);
-		EXPECT_EQ(board.square(1,0),0);
-		EXPECT_EQ(board.square(2,0),value);
-		EXPECT_EQ(board.square(3,0),0);
+	board.setSquare(0,0,value);
+	board.setSquare(2,0,value);
 
-		EXPECT_TRUE(board.push(Board::RIGHT));
+	EXPECT_EQ(value,board.square(0,0));
+	EXPECT_EQ(0,	board.square(1,0));
+	EXPECT_EQ(value,board.square(2,0));
+	EXPECT_EQ(0,	board.square(3,0));
 
-		EXPECT_EQ(board.square(0,0),0);
-		EXPECT_EQ(board.square(1,0),0);
-		EXPECT_EQ(board.square(2,0),0);
-		EXPECT_EQ(board.square(3,0),total);
-	}
+	EXPECT_TRUE(board.push(Board::RIGHT));
 
-	{ // two merges in one action
-		Board board(5,1);
-		const uint32_t value = 5;
-		const uint32_t total = 10;
+	EXPECT_EQ(0,	board.square(0,0));
+	EXPECT_EQ(0,	board.square(1,0));
+	EXPECT_EQ(0,	board.square(2,0));
+	EXPECT_EQ(total,board.square(3,0));
+}
 
-		board.setSquare(0,0,value);
-		board.setSquare(1,0,value);
-		board.setSquare(2,0,value);
-		board.setSquare(4,0,value);
+TEST(board, twoMergeInOnePush)
+{
+	Board board(5,1);
+	const uint32_t value = 5;
+	const uint32_t total = 10;
 
-		EXPECT_EQ(board.square(0,0),value);
-		EXPECT_EQ(board.square(1,0),value);
-		EXPECT_EQ(board.square(2,0),value);
-		EXPECT_EQ(board.square(3,0),0);
-		EXPECT_EQ(board.square(4,0),value);
+	board.setSquare(0,0,value);
+	board.setSquare(1,0,value);
+	board.setSquare(2,0,value);
+	board.setSquare(4,0,value);
 
-		EXPECT_TRUE(board.push(Board::RIGHT));
+	EXPECT_EQ(value,board.square(0,0));
+	EXPECT_EQ(value,board.square(1,0));
+	EXPECT_EQ(value,board.square(2,0));
+	EXPECT_EQ(0,	board.square(3,0));
+	EXPECT_EQ(value,board.square(4,0));
 
-		EXPECT_EQ(board.square(0,0),0);
-		EXPECT_EQ(board.square(1,0),0);
-		EXPECT_EQ(board.square(2,0),0);
-		EXPECT_EQ(board.square(3,0),total);
-		EXPECT_EQ(board.square(4,0),total);
-	}
+	EXPECT_TRUE(board.push(Board::RIGHT));
+
+	EXPECT_EQ(0,	board.square(0,0));
+	EXPECT_EQ(0,	board.square(1,0));
+	EXPECT_EQ(0,	board.square(2,0));
+	EXPECT_EQ(total,board.square(3,0));
+	EXPECT_EQ(total,board.square(4,0));
+}
+
+TEST(board, mergeIsNotChained)
+{
+	Board board(4,1);
+
+	board.setSquare(0,0,8);
+	board.setSquare(1,0,4);
+	board.setSquare(2,0,2);
+	board.setSquare(3,0,2);
+
+	EXPECT_EQ(8,	board.square(0,0));
+	EXPECT_EQ(4,	board.square(1,0));
+	EXPECT_EQ(2,	board.square(2,0));
+	EXPECT_EQ(2,	board.square(3,0));
+
+	EXPECT_TRUE(board.push(Board::RIGHT));
+
+	EXPECT_EQ(0,	board.square(0,0));
+	EXPECT_EQ(8,	board.square(1,0));
+	EXPECT_EQ(4,	board.square(2,0));
+	EXPECT_EQ(4,	board.square(3,0));
 }
 
 TEST(board, movable)
@@ -240,7 +263,7 @@ TEST(board, movable)
 		board.setSquare(1,1, 58);
 		board.setSquare(0,1, 97);
 		EXPECT_FALSE(board.isMovable());
-		board.setSquare(0,0, 43);
+		board.setSquare(0,0, 0);
 		EXPECT_TRUE(board.isMovable());
 	}
 }
