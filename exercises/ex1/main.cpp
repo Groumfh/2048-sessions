@@ -5,7 +5,7 @@
 
 // return value if it's equal to 5 otherwise return 0
 int error1Function(int value){
-	if (value = 5){
+	if ((value = 5)){
 		return value;
 	}
 	return 0;
