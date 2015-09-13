@@ -1,6 +1,13 @@
 #include <gtest/gtest.h>
 #include <core/board.h>
 
+#include <iostream>
+
+// used by gtest for error display
+void PrintTo(const Board::Pos& pos, ::std::ostream* os) {
+	*os << "("<< pos.x <<","<< pos.y << ")";
+}
+
 TEST(board, init)
 {
 	{
@@ -79,6 +86,7 @@ TEST(board, pushOneValue)
 {
 	Board board(3,3);
 	const uint32_t value = 5;
+	Board::Report report;
 
 	board.setSquare(0,0,value);
 
@@ -87,33 +95,64 @@ TEST(board, pushOneValue)
 	EXPECT_EQ(0,	board.square(2,2));
 	EXPECT_EQ(0,	board.square(2,0));
 
-	EXPECT_TRUE(board.push(Board::RIGHT));
+	report = board.push(Board::RIGHT);
+	ASSERT_TRUE(report.moves_.size() == 1);
+	EXPECT_EQ(Board::Pos(0,0), report.moves_.front().first);
+	EXPECT_EQ(Board::Pos(2,0), report.moves_.front().second);
+	EXPECT_TRUE(report.changed());
 
 	EXPECT_EQ(0,	board.square(0,0));
 	EXPECT_EQ(value,board.square(2,0));
 	EXPECT_EQ(0,	board.square(2,2));
 	EXPECT_EQ(0,	board.square(0,2));
 
-	EXPECT_TRUE(board.push(Board::DOWN));
+	report = board.push(Board::DOWN);
+	ASSERT_TRUE(report.moves_.size() == 1);
+	EXPECT_EQ(Board::Pos(2,0), report.moves_.front().first);
+	EXPECT_EQ(Board::Pos(2,2), report.moves_.front().second);
+	EXPECT_TRUE(report.changed());
 
 	EXPECT_EQ(0,	board.square(0,0));
 	EXPECT_EQ(0,	board.square(2,0));
 	EXPECT_EQ(value,board.square(2,2));
 	EXPECT_EQ(0,	board.square(0,2));
 
-	EXPECT_TRUE(board.push(Board::LEFT));
+	report = board.push(Board::LEFT);
+	ASSERT_TRUE(report.moves_.size() == 1);
+	EXPECT_EQ(Board::Pos(2,2), report.moves_.front().first);
+	EXPECT_EQ(Board::Pos(0,2), report.moves_.front().second);
+	EXPECT_TRUE(report.changed());
 
 	EXPECT_EQ(0,	board.square(0,0));
 	EXPECT_EQ(0,	board.square(2,0));
 	EXPECT_EQ(0,	board.square(2,2));
 	EXPECT_EQ(value,board.square(0,2));
 
-	EXPECT_TRUE(board.push(Board::UP));
+	report = board.push(Board::UP);
+	ASSERT_TRUE(report.moves_.size() == 1);
+	EXPECT_EQ(Board::Pos(0,2), report.moves_.front().first);
+	EXPECT_EQ(Board::Pos(0,0), report.moves_.front().second);
+	EXPECT_TRUE(report.changed());
 
 	EXPECT_EQ(value,board.square(0,0));
 	EXPECT_EQ(0,	board.square(0,2));
 	EXPECT_EQ(0,	board.square(2,2));
 	EXPECT_EQ(0,	board.square(2,0));
+}
+
+TEST(board, pushReport)
+{
+	Board board(5,1);
+	const uint32_t value = 5;
+
+	board.setSquare(2,0,value);
+
+	Board::Report report = board.push(Board::RIGHT);
+	EXPECT_EQ(value,board.square(4,0));
+	ASSERT_EQ(1,report.moves_.size());
+	EXPECT_EQ(Board::Pos(2,0), report.moves_[0].first);
+	EXPECT_EQ(Board::Pos(4,0), report.moves_[0].second);
+	EXPECT_TRUE(report.changed());
 }
 
 TEST(board, pushtest)
@@ -127,7 +166,7 @@ TEST(board, pushtest)
 	EXPECT_EQ(0,	board.square(1,0));
 	EXPECT_EQ(value,board.square(2,0));
 
-	EXPECT_FALSE(board.push(Board::RIGHT));
+	EXPECT_FALSE(board.push(Board::RIGHT).changed());
 
 	EXPECT_EQ(0,	board.square(0,0));
 	EXPECT_EQ(0,	board.square(1,0));
@@ -149,7 +188,13 @@ TEST(board, pushTwoValues)
 	EXPECT_EQ(0,	board.square(3,0));
 	EXPECT_EQ(0,	board.square(4,0));
 
-	EXPECT_TRUE(board.push(Board::RIGHT));
+	Board::Report report = board.push(Board::RIGHT);
+	ASSERT_EQ(2,report.moves_.size());
+	EXPECT_EQ(Board::Pos(2,0), report.moves_[0].first);
+	EXPECT_EQ(Board::Pos(4,0), report.moves_[0].second);
+	EXPECT_EQ(Board::Pos(0,0), report.moves_[1].first);
+	EXPECT_EQ(Board::Pos(3,0), report.moves_[1].second);
+	EXPECT_TRUE(report.changed());
 
 	EXPECT_EQ(0,	board.square(0,0));
 	EXPECT_EQ(0,	board.square(1,0));
@@ -157,7 +202,7 @@ TEST(board, pushTwoValues)
 	EXPECT_EQ(value,board.square(3,0));
 	EXPECT_EQ(value2,board.square(4,0));
 
-	EXPECT_FALSE(board.push(Board::RIGHT));
+	EXPECT_FALSE(board.push(Board::RIGHT).changed());
 }
 
 TEST(board, mergeTwoValuesEqualSticked)
@@ -173,7 +218,12 @@ TEST(board, mergeTwoValuesEqualSticked)
 	EXPECT_EQ(value,	board.square(1,0));
 	EXPECT_EQ(value,	board.square(2,0));
 
-	EXPECT_TRUE(board.push(Board::RIGHT));
+	Board::Report report = board.push(Board::RIGHT);
+	ASSERT_EQ(1,report.merges_.size());
+	EXPECT_EQ(Board::Pos(1,0), report.merges_[0].first);
+	EXPECT_EQ(Board::Pos(2,0), report.merges_[0].second);
+	ASSERT_EQ(0,report.moves_.size());
+	EXPECT_TRUE(report.changed());
 
 	EXPECT_EQ(0,		board.square(0,0));
 	EXPECT_EQ(0,		board.square(1,0));
@@ -194,7 +244,14 @@ TEST(board, mergeTwoValuesEqualSeparated)
 	EXPECT_EQ(value,board.square(2,0));
 	EXPECT_EQ(0,	board.square(3,0));
 
-	EXPECT_TRUE(board.push(Board::RIGHT));
+	Board::Report report = board.push(Board::RIGHT);
+	ASSERT_EQ(1,report.merges_.size());
+	EXPECT_EQ(Board::Pos(0,0), report.merges_[0].first);
+	EXPECT_EQ(Board::Pos(2,0), report.merges_[0].second);
+	ASSERT_EQ(1,report.moves_.size());
+	EXPECT_EQ(Board::Pos(2,0), report.moves_[0].first);
+	EXPECT_EQ(Board::Pos(3,0), report.moves_[0].second);
+	EXPECT_TRUE(report.changed());
 
 	EXPECT_EQ(0,	board.square(0,0));
 	EXPECT_EQ(0,	board.square(1,0));
@@ -219,7 +276,16 @@ TEST(board, twoMergeInOnePush)
 	EXPECT_EQ(0,	board.square(3,0));
 	EXPECT_EQ(value,board.square(4,0));
 
-	EXPECT_TRUE(board.push(Board::RIGHT));
+	Board::Report report = board.push(Board::RIGHT);
+	ASSERT_EQ(2,report.merges_.size());
+	EXPECT_EQ(Board::Pos(2,0), report.merges_[0].first);
+	EXPECT_EQ(Board::Pos(4,0), report.merges_[0].second);
+	EXPECT_EQ(Board::Pos(0,0), report.merges_[1].first);
+	EXPECT_EQ(Board::Pos(1,0), report.merges_[1].second);
+	ASSERT_EQ(1,report.moves_.size());
+	EXPECT_EQ(Board::Pos(1,0), report.moves_[0].first);
+	EXPECT_EQ(Board::Pos(3,0), report.moves_[0].second);
+	EXPECT_TRUE(report.changed());
 
 	EXPECT_EQ(0,	board.square(0,0));
 	EXPECT_EQ(0,	board.square(1,0));
@@ -242,7 +308,7 @@ TEST(board, mergeIsNotChained)
 	EXPECT_EQ(2,	board.square(2,0));
 	EXPECT_EQ(2,	board.square(3,0));
 
-	EXPECT_TRUE(board.push(Board::RIGHT));
+	EXPECT_TRUE(board.push(Board::RIGHT).changed());
 
 	EXPECT_EQ(0,	board.square(0,0));
 	EXPECT_EQ(8,	board.square(1,0));

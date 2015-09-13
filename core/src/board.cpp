@@ -1,6 +1,7 @@
 #include <core/board.h>
 
 #include <vector>
+#include <list>
 #include <exception>
 #include <assert.h>
 
@@ -32,22 +33,20 @@ void resetSquare(Board::ContentValue& value){
 	value = 0;
 }
 
-//
+struct PushArrayReport{
+	std::list<std::pair<int,int> > merges_;
+	std::list<std::pair<int,int> > moves_;
+};
 
-void pushArray(Array& array, bool& hasChanged){
-	Array::reverse_iterator emptyPos = array.rend();
+PushArrayReport pushArray(Array& array){
 	Array::reverse_iterator lastValuePos = array.rend();
 	Array::reverse_iterator it = array.rbegin();
 
+	PushArrayReport report;
+
+	// first pass (merge)
 	for(; it != array.rend(); it++){
-		// if current is empty and no empty position has been already defined,
-		// save this position
-		if (squareIsEmpty(*it)){
-			if (emptyPos == array.rend()){
-				emptyPos = it;
-			}
-		}
-		else {
+		if (!squareIsEmpty(*it)){
 			Board::ContentValue res;
 			// Current has a value
 			// try to merge it with the last value met
@@ -55,35 +54,55 @@ void pushArray(Array& array, bool& hasChanged){
 				// let's do the merge
 				*lastValuePos = res;
 				resetSquare(*it);
-				hasChanged = true;
+
+				report.merges_.push_back(std::make_pair(
+					std::distance(it,array.rend()) -1,
+					std::distance(lastValuePos,array.rend())-1));
 
 				// Change the current
 				it = lastValuePos;
 				// and reset lastValuePos (we don't want merge this new square)
 				lastValuePos = array.rend();
 			}
-			else if (emptyPos != array.rend()){
-				// an empty pos is under the current
-				// switch current to this empty pos
-				*emptyPos = *it;
-				resetSquare(*it);
-				hasChanged = true;
-
-				// Change the current
-				it = emptyPos;
-				// this pos become the last value pos
-				lastValuePos = it;
-				// reset empty pos
-				emptyPos = array.rend();
-			}
 			else{
 				lastValuePos = it;
 			}
-
 		}
 	}
+
+	// second pass (move)
+	Array::reverse_iterator emptyPos = array.rend();
+	for(it = array.rbegin(); it != array.rend(); it++){
+		// if current is empty and no empty position has been already defined,
+		// save this position
+		if (squareIsEmpty(*it)){
+			if (emptyPos == array.rend()){
+				emptyPos = it;
+			}
+		}
+		else if (emptyPos != array.rend()){
+			// an empty pos is under the current
+			// switch current to this empty pos
+			*emptyPos = *it;
+			resetSquare(*it);
+
+			report.moves_.push_back(std::make_pair(
+				std::distance(it,array.rend()) -1,
+				std::distance(emptyPos,array.rend())-1));
+
+			// Change the current
+			it = emptyPos;
+			// reset empty pos
+			emptyPos = array.rend();
+		}
+	}
+	return report;
 }
 }
+
+// ****************************************
+//         Board Impl
+// ****************************************
 
 #define ENSURE_ACCESS_VALID(impl,x,y) \
 	if (x >= impl->width_ || y >= impl->height_)\
@@ -98,10 +117,12 @@ public:
 	uint32_t width_;
 	uint32_t height_;
 
+	uint32_t getIndex(uint32_t index, Board::Direction direction) const;
 	Array getArray(Board::Direction direction, uint32_t index) const;
 	void setArray(Board::Direction direction, uint32_t index, Array& data);
+	void computeReport(Board::Direction direction, uint32_t index, PushArrayReport arrayReport, Board::Report& report);
 
-	bool testAndPush(Board::Direction direction, bool apply = true);
+	Board::Report testAndPush(Board::Direction direction, bool apply = true);
 };
 
 Board::Impl_::Impl_(uint32_t width, uint32_t height):
@@ -114,6 +135,15 @@ Board::Impl_::Impl_(uint32_t width, uint32_t height):
 	}
 }
 
+uint32_t Board::Impl_::getIndex(uint32_t index, Board::Direction direction) const{
+	switch(direction){
+		case Board::RIGHT:
+		case Board::DOWN: return index;
+		case Board::LEFT: return width_ - index - 1;
+		case Board::UP: return  height_ - index - 1;
+	}
+}
+
 Array Board::Impl_::getArray(Board::Direction direction, uint32_t index) const{
 
 	Array data;
@@ -121,16 +151,14 @@ Array Board::Impl_::getArray(Board::Direction direction, uint32_t index) const{
 		ENSURE_ACCESS_VALID(this,index,0);
 		data.resize(height_);
 		for (uint32_t i = 0; i < height_; i++){
-			uint32_t writeIndex = (direction == Board::DOWN) ? i : height_ - i - 1;
-			data[writeIndex] = values_[index][i];
+			data[getIndex(i,direction)] = values_[index][i];
 		}
 	}
 	else{
 		ENSURE_ACCESS_VALID(this,0,index);
 		data.resize(width_);
 		for (uint32_t i = 0; i < width_; i++){
-			uint32_t writeIndex = (direction == Board::RIGHT) ? i : width_ - i - 1;
-			data[writeIndex] = values_[i][index];
+			data[getIndex(i,direction)] = values_[i][index];
 		}
 	}
 	return data;
@@ -141,40 +169,71 @@ void Board::Impl_::setArray(Board::Direction direction, uint32_t index, Array& d
 	if (direction & AXE_VERTICAL){
 		assert(data.size() == height_);
 		for (uint32_t i = 0; i < height_; i++){
-			uint32_t readIndex = (direction == Board::DOWN) ? i : height_ - i - 1;
-			values_[index][i] = data[readIndex];
+			values_[index][i] = data[getIndex(i,direction)];
 		}
 	}
 	else{
 		assert(data.size() == width_);
 		for (uint32_t i = 0; i < width_; i++){
-			uint32_t readIndex = (direction == Board::RIGHT) ? i : width_ - i - 1;
-			values_[i][index] = data[readIndex];
+			values_[i][index] = data[getIndex(i,direction)];
 		}
 	}
 }
 
-bool Board::Impl_::testAndPush(Board::Direction direction,bool apply)
+void Board::Impl_::computeReport(Board::Direction direction, uint32_t index, PushArrayReport arrayReport, Board::Report& report)
 {
-	bool stateChanged = false;
+	if (direction & AXE_VERTICAL){
+		for(std::pair<int,int> move: arrayReport.moves_){
+			report.moves_.push_back(std::make_pair(
+				Pos(index,getIndex(move.first,direction)),
+				Pos(index,getIndex(move.second,direction))));
+		}
+		for(std::pair<int,int> merge: arrayReport.merges_){
+			report.merges_.push_back(std::make_pair(
+				Pos(index,getIndex(merge.first,direction)),
+				Pos(index,getIndex(merge.second,direction))));
+		}
+	}
+	else{
+		for(std::pair<int,int> move: arrayReport.moves_){
+			report.moves_.push_back(std::make_pair(
+				Pos(getIndex(move.first,direction),index),
+				Pos(getIndex(move.second,direction),index)));
+		}
+		for(std::pair<int,int> merge: arrayReport.merges_){
+			report.merges_.push_back(std::make_pair(
+				Pos(getIndex(merge.first,direction),index),
+				Pos(getIndex(merge.second,direction),index)));
+		}
+	}
+}
+
+Board::Report Board::Impl_::testAndPush(Board::Direction direction,bool apply)
+{
+	Board::Report report;
 	if (direction & AXE_HORIZONTAL && width_ > 1){
 		for (int i = 0; i < height_; i++){
 			Array array = getArray(direction,i);
-			pushArray(array,stateChanged);
+			PushArrayReport arrayReport = pushArray(array);
+			computeReport(direction,i,arrayReport,report);
 			if (apply) setArray(direction,i,array);
 		}
 	}
 	else if (direction & AXE_VERTICAL && height_ > 1){
 		for (int i = 0;i < width_; i++){
 			Array array = getArray(direction,i);
-			pushArray(array,stateChanged);
+			PushArrayReport arrayReport = pushArray(array);
+			computeReport(direction,i,arrayReport,report);
 			if (apply) setArray(direction,i,array);
 		}
 	}
-	return stateChanged;
+	return report;
 }
 
 
+// ****************************************
+//         Board class
+// ****************************************
 Board::Board(uint32_t width, uint32_t height):
 	impl_(new Impl_(width,height)){
 }
@@ -190,7 +249,7 @@ uint32_t Board::height() const{
 	return impl_->height_;
 }
 
-bool Board::push(Board::Direction direction){
+Board::Report Board::push(Board::Direction direction){
 	return impl_->testAndPush(direction);
 }
 
@@ -211,10 +270,10 @@ bool Board::isFull() const{
 
 bool Board::isMovable() const{
 	return
-		impl_->testAndPush(LEFT,false) ||
-		impl_->testAndPush(RIGHT,false) ||
-		impl_->testAndPush(UP,false) ||
-		impl_->testAndPush(DOWN,false);
+		impl_->testAndPush(LEFT,false).changed() ||
+		impl_->testAndPush(RIGHT,false).changed() ||
+		impl_->testAndPush(UP,false).changed() ||
+		impl_->testAndPush(DOWN,false).changed();
 }
 
 std::vector<Board::Pos> Board::emptySquares() const {

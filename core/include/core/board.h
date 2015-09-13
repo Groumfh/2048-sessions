@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include <list>
 
 class Board
 {
@@ -24,6 +25,12 @@ public:
 		}
 	};
 
+	struct Report{
+		std::vector<std::pair<Pos,Pos> > moves_;
+		std::vector<std::pair<Pos,Pos> > merges_;
+		bool changed() const{ return !moves_.empty() || !merges_.empty();}
+	};
+
 	typedef uint32_t ContentValue;
 
 	Board(uint32_t width, uint32_t height);
@@ -40,7 +47,7 @@ public:
 
 	std::vector<Pos> emptySquares() const;
 
-	bool push(Direction direction);
+	Report push(Direction direction);
 
 private:
 	class Impl_;

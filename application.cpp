@@ -7,7 +7,7 @@
 #include <GLFW/glfw3.h>
 
 #include <random>
-#include <algorithm> 
+#include <algorithm>
 
 #include <resources_path.h>
 
@@ -132,7 +132,7 @@ void Application::Impl_::keyEvent(int key, int scancode, int action, int mods){
 void Application::Impl_::pushOnBoard(Board::Direction direction){
 	if (isEnd_) return;
 
-	if (board_->push(direction)){
+	if (board_->push(direction).changed()){
 		// generate a random square
 		std::vector<Board::Pos> squares = board_->emptySquares();
 		if (squares.size() != 0){
@@ -147,10 +147,7 @@ void Application::Impl_::pushOnBoard(Board::Direction direction){
 Application::Application(int argc, char** argv):
 	impl_(new Impl_){
 
-	impl_->board_->setSquare(0,0,4);
-//	impl_->board_->setSquare(0,3,8);
-//	impl_->board_->setSquare(1,2,2);
-//	impl_->board_->setSquare(3,2,2);
+	impl_->board_->setSquare(0,0,2);
 
 	assert(app == NULL);
 	app = this;
