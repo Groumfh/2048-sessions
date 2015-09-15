@@ -135,23 +135,30 @@ void Application::Impl_::keyEvent(int key, int scancode, int action, int mods){
 		{
 			switch (key)
 			{
-			case GLFW_KEY_UP: pushOnBoard(Board::UP); return;
-			case GLFW_KEY_DOWN: pushOnBoard(Board::DOWN); return;
-			case GLFW_KEY_LEFT: pushOnBoard(Board::LEFT); return;
-			case GLFW_KEY_RIGHT: pushOnBoard(Board::RIGHT); return;
-			case GLFW_KEY_ESCAPE: glfwSetWindowShouldClose(window_.get(), GL_TRUE); return;
+				case GLFW_KEY_UP: pushOnBoard(Board::UP); return;
+				case GLFW_KEY_DOWN: pushOnBoard(Board::DOWN); return;
+				case GLFW_KEY_LEFT: pushOnBoard(Board::LEFT); return;
+				case GLFW_KEY_RIGHT: pushOnBoard(Board::RIGHT); return;
+				case GLFW_KEY_ESCAPE: glfwSetWindowShouldClose(window_.get(), GL_TRUE); return;
+				case GLFW_KEY_SPACE: {
+					int i = int(boardView_->getMode());
+					i++;
+					if (BoardView::modeEnum(i) == BoardView::COUNT) {
+						i = 0;
+					}
+					boardView_->setMode(BoardView::modeEnum(i));
+					return;
+				}
 			}
 		}
 		if (AS == Menu)
 		{
 			switch (key)
 			{
-			case GLFW_KEY_P: AS = Play; return;
-			case GLFW_KEY_E: glfwSetWindowShouldClose(window_.get(), GL_TRUE); return;
+				case GLFW_KEY_P: AS = Play; return;
+				case GLFW_KEY_E: glfwSetWindowShouldClose(window_.get(), GL_TRUE); return;
 			}
-
 		}
-
 	}
 }
 
@@ -231,5 +238,8 @@ int Application::run()
 	}
 	return 0;
 }
+
+
+
 
 
