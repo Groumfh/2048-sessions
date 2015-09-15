@@ -71,6 +71,7 @@ set(SOURCES
 	glfw.cpp
 	boardview.cpp
 	achievement.cpp
+	scoremanager.cpp
 	${GLEW_SOURCES}
 	${NANVOG_SOURCES})
 

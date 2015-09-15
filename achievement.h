@@ -24,7 +24,7 @@ public:
 	Achievement();
 	~Achievement();
 
-	void CheckValue(Board::ContentValue value, GLFWwindow* window);
+	void CheckValue(Board::ContentValue value);
 	void Popup(int num);
 	void PaintEvent(NVGcontext* context, Rect rect);
 

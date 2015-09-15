@@ -1,4 +1,5 @@
 #include "application.h"
+#include "scoremanager.h"
 
 #include <core/board.h>
 #include "boardview.h"
@@ -8,6 +9,7 @@
 
 #include <random>
 #include <algorithm>
+#include <sstream>
 
 #include <resources_path.h>
 
@@ -34,7 +36,7 @@ public:
 	std::unique_ptr<Board> board_;
 	std::unique_ptr<BoardView> boardView_;
 	std::unique_ptr<Achievement> achieve_;
-	bool isEnd_;
+	std::unique_ptr<ScoreManager> scoreManager_;
 
 	AppState AS;
 
@@ -50,7 +52,6 @@ public:
 Application::Impl_::Impl_():
 	window_(glfwCreateWindow( 300, 300, "2048", NULL, NULL),glfwDestroyWindow),
 	board_(new Board(4,4)),
-	isEnd_(false),
 	achieve_(new Achievement()),
 	AS(Menu)
 {
@@ -124,7 +125,11 @@ void Application::Impl_::paintEvent(NVGcontext* context){
 		nvgClosePath(context);
 
 		// & display the game over
-		std::string text("GAME OVER");
+		int score = scoreManager_->calculScore();
+		std::stringstream ss;
+		ss << score;
+		std::string str = ss.str();
+		std::string text("GAME OVER     SCORE " + str);
 		nvgBeginPath(context);
 		float x= 0;
 		float y= 0;
@@ -215,6 +220,7 @@ Application::Application(int argc, char** argv) :
 	app = this;
 
 	impl_->boardView_.reset(new BoardView(impl_->board_.get()));
+	impl_->scoreManager_.reset(new ScoreManager(impl_->board_.get()));
 	// Set callback functions
 	glfwSetKeyCallback(impl_->window_.get(), Application::Impl_::keyCallBack);
 	glfwSetFramebufferSizeCallback(impl_->window_.get(),Application::Impl_::resizeCallback);
@@ -258,7 +264,7 @@ int Application::run()
 
 		for (int i = 0; i < impl_->board_->height(); i++)
 			for (int j = 0; j < impl_->board_->width(); j++)
-				impl_->achieve_->CheckValue(impl_->board_->square(i, j), impl_->window_.get());
+				impl_->achieve_->CheckValue(impl_->board_->square(i, j));
 
 		// Swap buffers
 		glfwSwapBuffers(impl_->window_.get());

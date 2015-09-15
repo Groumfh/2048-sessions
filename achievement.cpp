@@ -27,7 +27,7 @@ Achievement::~Achievement()
 {
 }
 
-void Achievement::CheckValue(Board::ContentValue value, GLFWwindow* window)
+void Achievement::CheckValue(Board::ContentValue value)
 {
 	for (std::map<Achieve, std::pair<int, bool>>::iterator it = tabAchieve.begin() ; it != tabAchieve.end() ; it++)
 		if (value == it->second.first && !it->second.second)
