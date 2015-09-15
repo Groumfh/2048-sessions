@@ -70,6 +70,7 @@ set(SOURCES
 	nvg.cpp
 	glfw.cpp
 	boardview.cpp
+	scoremanager.cpp
 	${GLEW_SOURCES}
 	${NANVOG_SOURCES})
 
