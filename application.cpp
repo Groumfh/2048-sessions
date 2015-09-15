@@ -4,7 +4,7 @@
 #include <core/board.h>
 #include "boardview.h"
 #include "nvg.h"
-
+#include <achievement.h>
 #include <GLFW/glfw3.h>
 
 #include <random>
@@ -35,6 +35,7 @@ public:
 	std::unique_ptr<GLFWwindow,void(*)(GLFWwindow*)> window_;
 	std::unique_ptr<Board> board_;
 	std::unique_ptr<BoardView> boardView_;
+	std::unique_ptr<Achievement> achieve_;
 	std::unique_ptr<ScoreManager> scoreManager_;
 
 	AppState AS;
@@ -48,9 +49,10 @@ public:
 	void pushOnBoard(Board::Direction direction);
 };
 
-Application::Impl_::Impl_() :
-	window_(glfwCreateWindow(300, 300, "2048", NULL, NULL), glfwDestroyWindow),
-	board_(new Board(4, 4)),
+Application::Impl_::Impl_():
+	window_(glfwCreateWindow( 300, 300, "2048", NULL, NULL),glfwDestroyWindow),
+	board_(new Board(4,4)),
+	achieve_(new Achievement()),
 	AS(Menu)
 {
 }
@@ -98,6 +100,10 @@ void Application::Impl_::paintEvent(NVGcontext* context){
 
 	// draw the board
 	boardView_->paint(context,boardRect);
+
+
+	Rect achieveRect( 5.f, boardMaxRect.width - 50.f,  100.f,  40.f);
+	achieve_->PaintEvent(context, achieveRect);
 
 	if (AS == Menu)
 	{
@@ -254,8 +260,12 @@ int Application::run()
 		glClearColor(0.3f, 0.3f, 0.32f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-		impl_->paintEvent(context); 
-		
+		impl_->paintEvent(context);
+
+		for (int i = 0; i < impl_->board_->height(); i++)
+			for (int j = 0; j < impl_->board_->width(); j++)
+				impl_->achieve_->CheckValue(impl_->board_->square(i, j));
+
 		// Swap buffers
 		glfwSwapBuffers(impl_->window_.get());
 		glfwPollEvents();
