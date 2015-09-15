@@ -13,7 +13,7 @@ public:
 	~BoardView();
 
 	void paint(NVGcontext* context, Rect rect);
-
+	Board* getBoard();
 private:
 	class Impl_;
 	std::unique_ptr<Impl_> impl_;

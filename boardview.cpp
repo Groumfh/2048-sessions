@@ -118,3 +118,7 @@ void BoardView::paint(NVGcontext* context, Rect rect)
 	nvgClosePath(context);
 }
 
+Board* BoardView::getBoard()
+{
+	return impl_->board_;
+}
