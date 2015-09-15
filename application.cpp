@@ -11,9 +11,16 @@
 
 #include <resources_path.h>
 
-namespace{
+namespace {
 
-static Application* app = NULL;
+	static Application* app = NULL;
+	enum AppState
+	{
+		Menu,
+		Play,
+		Mode,
+		End
+	};
 
 }
 
@@ -29,6 +36,8 @@ public:
 	std::unique_ptr<Achievement> achieve_;
 	bool isEnd_;
 
+	AppState AS;
+
 	static void resizeCallback(GLFWwindow* window, int width, int height);
 	static void keyCallBack(GLFWwindow* window, int key, int scancode, int action, int mods);
 
@@ -42,7 +51,8 @@ Application::Impl_::Impl_():
 	window_(glfwCreateWindow( 300, 300, "2048", NULL, NULL),glfwDestroyWindow),
 	board_(new Board(4,4)),
 	isEnd_(false),
-	achieve_(new Achievement())
+	achieve_(new Achievement()),
+	AS(Menu)
 {
 }
 
@@ -90,10 +100,21 @@ void Application::Impl_::paintEvent(NVGcontext* context){
 	// draw the board
 	boardView_->paint(context,boardRect);
 
+
 	Rect achieveRect( 5.f, boardMaxRect.width - 50.f,  100.f,  40.f);
 	achieve_->PaintEvent(context, achieveRect);
 
-	if (isEnd_){
+	if (AS == Menu)
+	{
+		//Start graphic
+	}
+
+	if (AS == Mode)
+	{
+		//Mode graphic
+	}
+
+	if (AS == End) {
 
 		// change the color of the board
 		nvgBeginPath(context);
@@ -123,19 +144,55 @@ void Application::Impl_::paintEvent(NVGcontext* context){
 
 void Application::Impl_::keyEvent(int key, int scancode, int action, int mods){
 
-	if (action == GLFW_PRESS){
-		switch(key){
-			case GLFW_KEY_UP: pushOnBoard(Board::UP); return;
-			case GLFW_KEY_DOWN: pushOnBoard(Board::DOWN); return;
-			case GLFW_KEY_LEFT: pushOnBoard(Board::LEFT); return;
-			case GLFW_KEY_RIGHT: pushOnBoard(Board::RIGHT); return;
-			case GLFW_KEY_ESCAPE: glfwSetWindowShouldClose(window_.get(), GL_TRUE); return;
+	if (action == GLFW_PRESS) {
+		if (AS == Play)
+		{
+			switch (key)
+			{
+				case GLFW_KEY_UP: pushOnBoard(Board::UP); return;
+				case GLFW_KEY_DOWN: pushOnBoard(Board::DOWN); return;
+				case GLFW_KEY_LEFT: pushOnBoard(Board::LEFT); return;
+				case GLFW_KEY_RIGHT: pushOnBoard(Board::RIGHT); return;
+				case GLFW_KEY_ESCAPE: glfwSetWindowShouldClose(window_.get(), GL_TRUE); return;
+				case GLFW_KEY_SPACE: {
+					int i = int(boardView_->getMode());
+					i++;
+					if (BoardView::modeEnum(i) == BoardView::COUNT) {
+						i = 0;
+					}
+					boardView_->setMode(BoardView::modeEnum(i));
+					return;
+				}
+			}
+		}
+
+		if (AS == Menu)
+		{
+			switch (key)
+			{
+				case GLFW_KEY_P: AS = Play; return;
+				case GLFW_KEY_M: AS = Mode; return;
+				case GLFW_KEY_E: glfwSetWindowShouldClose(window_.get(), GL_TRUE); return;
+			}
+		}
+
+		if (AS==Mode)
+		{
+			switch (key)
+			{
+				case GLFW_KEY_1: boardView_->setMode(BoardView::numeric); return;
+				case GLFW_KEY_2: boardView_->setMode(BoardView::symboles); return;
+				case GLFW_KEY_3: boardView_->setMode(BoardView::smiley); return;
+				case GLFW_KEY_4: boardView_->setMode(BoardView::romain); return;
+				case GLFW_KEY_5: boardView_->setMode(BoardView::alphabet); return;
+				case GLFW_KEY_P: AS = Play; return;
+			}
 		}
 	}
 }
 
 void Application::Impl_::pushOnBoard(Board::Direction direction){
-	if (isEnd_) return;
+	if (AS==End) return;
 
 	if (board_->push(direction).changed()){
 		// generate a random square
@@ -149,10 +206,10 @@ void Application::Impl_::pushOnBoard(Board::Direction direction){
 	}
 }
 
-Application::Application(int argc, char** argv):
-	impl_(new Impl_){
+Application::Application(int argc, char** argv) :
+	impl_(new Impl_) {
 
-	impl_->board_->setSquare(0,0,2);
+	impl_->board_->setSquare(0, 0, 2);
 
 	assert(app == NULL);
 	app = this;
@@ -191,11 +248,11 @@ bool Application::initGL(){
 
 int Application::run()
 {
-	while(!glfwWindowShouldClose(impl_->window_.get()) )
+	while (!glfwWindowShouldClose(impl_->window_.get()))
 	{
 		NVGcontext* context = NVG::instance()->context();
 		glClearColor(0.3f, 0.3f, 0.32f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 		impl_->paintEvent(context);
 
@@ -208,11 +265,14 @@ int Application::run()
 		glfwPollEvents();
 
 		// test if end is occured
-		if (!impl_->board_->isMovable() && !impl_->isEnd_){
-			impl_->isEnd_ = true;
+		if (!impl_->board_->isMovable() && impl_->AS!=End) {
+			impl_->AS=End;
 		}
 	}
 	return 0;
 }
+
+
+
 
 
