@@ -27,6 +27,8 @@ public:
 	std::unique_ptr<Board> board_;
 	std::unique_ptr<BoardView> boardView_;
 	bool isEnd_;
+	bool isStart_;
+
 
 	static void resizeCallback(GLFWwindow* window, int width, int height);
 	static void keyCallBack(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -40,7 +42,8 @@ public:
 Application::Impl_::Impl_():
 	window_(glfwCreateWindow( 300, 300, "2048", NULL, NULL),glfwDestroyWindow),
 	board_(new Board(4,4)),
-	isEnd_(false)
+	isEnd_(false),
+	isStart_(true)
 {
 }
 
@@ -87,6 +90,11 @@ void Application::Impl_::paintEvent(NVGcontext* context){
 
 	// draw the board
 	boardView_->paint(context,boardRect);
+
+	if (isStart_)
+	{
+		//Start graphic
+	}
 
 	if (isEnd_){
 
