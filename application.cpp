@@ -18,6 +18,7 @@ namespace {
 	{
 		Menu,
 		Play,
+		Mode,
 		End
 	};
 
@@ -100,6 +101,11 @@ void Application::Impl_::paintEvent(NVGcontext* context){
 		//Start graphic
 	}
 
+	if (AS == Mode)
+	{
+		//Mode graphic
+	}
+
 	if (AS == End) {
 
 		// change the color of the board
@@ -151,12 +157,27 @@ void Application::Impl_::keyEvent(int key, int scancode, int action, int mods){
 				}
 			}
 		}
+
 		if (AS == Menu)
 		{
 			switch (key)
 			{
 				case GLFW_KEY_P: AS = Play; return;
+				case GLFW_KEY_M: AS = Mode; return;
 				case GLFW_KEY_E: glfwSetWindowShouldClose(window_.get(), GL_TRUE); return;
+			}
+		}
+
+		if (AS==Mode)
+		{
+			switch (key)
+			{
+				case GLFW_KEY_1: boardView_->setMode(BoardView::numeric); return;
+				case GLFW_KEY_2: boardView_->setMode(BoardView::symboles); return;
+				case GLFW_KEY_3: boardView_->setMode(BoardView::smiley); return;
+				case GLFW_KEY_4: boardView_->setMode(BoardView::romain); return;
+				case GLFW_KEY_5: boardView_->setMode(BoardView::alphabet); return;
+				case GLFW_KEY_P: AS = Play; return;
 			}
 		}
 	}
