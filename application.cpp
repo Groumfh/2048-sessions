@@ -27,6 +27,107 @@ namespace {
 
 }
 
+//Might be a better idea to separate this from the rest
+class Application::LifeManager_ : public non_copyable
+{
+public:
+	LifeManager_();
+	LifeManager_(GLFWwindow* window, BoardView* boardview);
+
+	GLFWwindow* window_;
+	BoardView* boardView_;
+
+	int lives;
+
+	void setBoardView(BoardView* boardview);
+
+	void removeSquareAt(double xpos, double ypos);
+
+	static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+	void mouseEvent(int button, int action, int mods, double xpos, double ypos);
+
+	void PaintEvent(NVGcontext* context, Rect rect);
+};
+
+Application::LifeManager_::LifeManager_()
+	: lives(3)
+{
+
+}
+
+Application::LifeManager_::LifeManager_(GLFWwindow* window, BoardView* boardview)
+	: window_(window), boardView_(boardview), lives(3)
+{
+
+}
+
+void Application::LifeManager_::setBoardView(BoardView* boardview)
+{
+	boardView_ = boardview;
+}
+
+void Application::LifeManager_::removeSquareAt(double xpos, double ypos)
+{
+	if (lives == 0)
+	{
+		return;
+	}
+
+	int x, y;
+	if (boardView_->contains(xpos, ypos))
+	{
+		boardView_->getCoordinates(xpos, ypos, x, y);
+		if (boardView_->getBoard()->square(x, y))
+		{
+			boardView_->getBoard()->setSquare(x, y, 0);
+			lives -= 1;
+		}
+		return;
+	}
+}
+
+void Application::LifeManager_::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+{
+	double xpos, ypos;
+	glfwGetCursorPos(window, &xpos, &ypos);
+	app->lifeManager_->mouseEvent(button, action, mods, xpos, ypos);
+}
+
+void Application::LifeManager_::mouseEvent(int button, int action, int mod, double xpos, double ypos)
+{
+	if (action == GLFW_PRESS) {
+		switch (button) {
+		case GLFW_MOUSE_BUTTON_LEFT:
+			removeSquareAt(xpos, ypos);
+			return;
+		}
+	}
+}
+
+void Application::LifeManager_::PaintEvent(NVGcontext* context, Rect rect)
+{
+	Rect textRect(rect);
+
+	//Display number of remaining lives
+	std::string text(std::to_string(lives));
+	nvgBeginPath(context);
+	float x = 0;
+	float y = 0;
+	textRect.center(x, y);
+	nvgFontSize(context, 20);
+	nvgFontFace(context, "sans");
+	nvgTextAlign(context, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
+	nvgFill(context);
+	nvgFillColor(context, nvgRGBA(0, 0, 0, 255));
+	nvgText(context, x + 1, y + 1, text.c_str(), NULL);
+	nvgFillColor(context, nvgRGBA(200, 20, 20, 255));
+	nvgText(context, x, y, text.c_str(), NULL);
+	nvgClosePath(context);
+
+}
+
+//There
+
 class Application::Impl_ : public non_copyable
 {
 public:
@@ -102,9 +203,11 @@ void Application::Impl_::paintEvent(NVGcontext* context){
 	// draw the board
 	boardView_->paint(context,boardRect);
 
-
 	Rect achieveRect( 5.f, boardMaxRect.width - 50.f,  100.f,  40.f);
 	achieve_->PaintEvent(context, achieveRect);
+
+	Rect livesRect(width - 50.f, 10.f, 45.f, 20);
+	app->lifeManager_->PaintEvent(context, livesRect);
 
 	if (AS == Menu)
 	{
@@ -223,82 +326,6 @@ void Application::Impl_::pushOnBoard(Board::Direction direction){
 			std::uniform_int_distribution<int> distribution(0,squares.size()-1);
 			int index = distribution(generator);
 			board_->setSquare(squares[index].x,squares[index].y,std::uniform_int_distribution<int>(0,1)(generator)? 2:4);
-		}
-	}
-}
-
-class Application::LifeManager_ : public non_copyable
-{
-public:
-	LifeManager_();
-	LifeManager_(GLFWwindow* window, BoardView* boardview);
-
-	GLFWwindow* window_;
-	BoardView* boardView_;
-
-	int lives;
-
-	void setBoardView(BoardView* boardview);
-
-	void removeSquareAt(double xpos, double ypos);
-
-	static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
-	void mouseEvent(int button, int action, int mods, double xpos, double ypos);
-
-
-};
-
-Application::LifeManager_::LifeManager_()
-	: lives(3)
-{
-
-}
-
-Application::LifeManager_::LifeManager_(GLFWwindow* window, BoardView* boardview)
-	: window_(window) , boardView_(boardview), lives(3)
-{
-
-}
-
-void Application::LifeManager_::setBoardView(BoardView* boardview)
-{
-	boardView_ = boardview;
-}
-
-void Application::LifeManager_::removeSquareAt(double xpos, double ypos)
-{
-	if (lives == 0) 
-	{ 
-		return;
-	}
-		
-	int x, y;
-	if (boardView_->contains(xpos, ypos))
-	{
-		boardView_->getCoordinates(xpos,ypos,x,y);
-		if (boardView_->getBoard()->square(x, y))
-		{
-			boardView_->getBoard()->setSquare(x, y, 0);
-			lives -= 1;
-		}
-		return;
-	}
-}
-
-void Application::LifeManager_::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
-{
-	double xpos, ypos;
-	glfwGetCursorPos(window, &xpos, &ypos);
-	app->lifeManager_->mouseEvent(button, action, mods, xpos, ypos);
-}
-
-void Application::LifeManager_::mouseEvent(int button, int action, int mod, double xpos, double ypos)
-{
-	if (action == GLFW_PRESS) {
-		switch (button)	{
-		case GLFW_MOUSE_BUTTON_LEFT:
-			removeSquareAt(xpos, ypos); 
-			return;
 		}
 	}
 }
