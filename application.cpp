@@ -202,9 +202,6 @@ void Application::Impl_::paintEvent(NVGcontext* context){
 	nvgFill(context);
 	nvgClosePath(context);
 
-	Rect achieveRect( 5.f, boardMaxRect.width - 50.f,  100.f,  40.f);
-	achieve_->PaintEvent(context, achieveRect);
-
 	Rect livesRect(width - 50.f, 10.f, 45.f, 20);
 	app->lifeManager_->PaintEvent(context, livesRect);
 	if (AS == MainMenu)
@@ -259,6 +256,9 @@ void Application::Impl_::paintEvent(NVGcontext* context){
 		nvgFillColor(context, nvgRGBA(200,20,20,255));
 		nvgText(context,x,y,text.c_str(),NULL);
 	}
+
+	Rect achieveRect(5.f, boardMaxRect.width - 50.f, 100.f, 40.f);
+	achieve_->PaintEvent(context, achieveRect);
 
 	nvgEndFrame(context);
 }
