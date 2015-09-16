@@ -58,7 +58,7 @@ Menu::~Menu()
 {
 }
 
-void Menu::paint(NVGcontext* context, Rect rect, std::vector<char*> btnNames)
+void Menu::paint(NVGcontext* context, Rect rect, std::vector<char*> btnNames, int mode)
 {
 	Rect boardRect = rect;
 	float boardMargin = 10;
@@ -101,7 +101,15 @@ void Menu::paint(NVGcontext* context, Rect rect, std::vector<char*> btnNames)
 		
 		nvgBeginPath(context);
 		nvgRoundedRect(context, btn, 5);
-		nvgFillColor(context, nvgRGBA(0, 150, 100, 255)); //Button color
+		if (i == mode)
+		{
+			nvgFillColor(context, nvgRGBA(0, 150, 255, 255));
+		}
+		else
+		{
+			nvgFillColor(context, nvgRGBA(0, 150, 100, 255));
+		}
+		 //Button color
 		nvgFill(context);
 		nvgClosePath(context);
 

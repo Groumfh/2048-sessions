@@ -202,9 +202,6 @@ void Application::Impl_::paintEvent(NVGcontext* context){
 	nvgFill(context);
 	nvgClosePath(context);
 
-	// draw the board
-	boardView_->paint(context,boardRect);
-
 	Rect achieveRect( 5.f, boardMaxRect.width - 50.f,  100.f,  40.f);
 	achieve_->PaintEvent(context, achieveRect);
 
@@ -219,12 +216,19 @@ void Application::Impl_::paintEvent(NVGcontext* context){
 	if (AS == Mode)
 	{
 		//Mode graphic
-		menu_->paint(context, boardRect, std::vector<char*>{ "1. Numeric", "2. Symboles", "3. Smiley", "4. Romains", "5. Alphabet", "6. Jouer" });
+		menu_->paint(context, boardRect, std::vector<char*>{ "1. Numeric", "2. Symboles", "3. Smiley", "4. Alphabet", "5. Romains", "6. Jouer" }, boardView_->getMode());
 	}
 
 	if (AS == HallOfFame)
 	{
 		//Hall of Fame graphic
+		menu_->paint(context, boardRect, std::vector<char*>{ "1.", "2.", "3.", "4.", "5.", "6.","btn2"});
+	}
+
+	if (AS == Play)
+	{
+		// draw the board
+		boardView_->paint(context, boardRect);
 	}
 
 	if (AS == End) {
@@ -301,8 +305,8 @@ void Application::Impl_::keyEvent(int key, int scancode, int action, int mods){
 				case GLFW_KEY_KP_1: boardView_->setMode(BoardView::numeric); return;
 				case GLFW_KEY_KP_2: boardView_->setMode(BoardView::symboles); return;
 				case GLFW_KEY_KP_3: boardView_->setMode(BoardView::smiley); return;
-				case GLFW_KEY_KP_4: boardView_->setMode(BoardView::romain); return;
-				case GLFW_KEY_KP_5: boardView_->setMode(BoardView::alphabet); return;
+				case GLFW_KEY_KP_4: boardView_->setMode(BoardView::alphabet); return;
+				case GLFW_KEY_KP_5: boardView_->setMode(BoardView::romain); return;
 				case GLFW_KEY_KP_6: AS = Play; return;
 			}
 		}

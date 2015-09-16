@@ -10,7 +10,7 @@ public:
 	Menu(Board * board_);
 	~Menu();
 
-	void paint(NVGcontext* context, Rect rect, std::vector<char*> btnNames);
+	void paint(NVGcontext* context, Rect rect, std::vector<char*> btnNames, int mode = 0);
 private:
 	class Impl_;
 	std::unique_ptr<Impl_> impl_;
