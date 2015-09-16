@@ -21,6 +21,7 @@ namespace {
 		Menu,
 		Play,
 		Mode,
+		HallOfFame,
 		End
 	};
 
@@ -115,6 +116,11 @@ void Application::Impl_::paintEvent(NVGcontext* context){
 		//Mode graphic
 	}
 
+	if (AS == HallOfFame)
+	{
+		//Hall of Fame graphic
+	}
+
 	if (AS == End) {
 
 		// change the color of the board
@@ -175,22 +181,32 @@ void Application::Impl_::keyEvent(int key, int scancode, int action, int mods){
 		{
 			switch (key)
 			{
-				case GLFW_KEY_P: AS = Play; return;
-				case GLFW_KEY_M: AS = Mode; return;
-				case GLFW_KEY_E: glfwSetWindowShouldClose(window_.get(), GL_TRUE); return;
+				case GLFW_KEY_KP_1: AS = Play; return;
+				case GLFW_KEY_KP_2: AS = Mode; return;
+				case GLFW_KEY_KP_3: AS = HallOfFame; return;
+				case GLFW_KEY_KP_4: glfwSetWindowShouldClose(window_.get(), GL_TRUE); return;
 			}
 		}
 
-		if (AS==Mode)
+		if (AS == Mode)
 		{
 			switch (key)
 			{
-				case GLFW_KEY_1: boardView_->setMode(BoardView::numeric); return;
-				case GLFW_KEY_2: boardView_->setMode(BoardView::symboles); return;
-				case GLFW_KEY_3: boardView_->setMode(BoardView::smiley); return;
-				case GLFW_KEY_4: boardView_->setMode(BoardView::romain); return;
-				case GLFW_KEY_5: boardView_->setMode(BoardView::alphabet); return;
-				case GLFW_KEY_P: AS = Play; return;
+				case GLFW_KEY_KP_1: boardView_->setMode(BoardView::numeric); return;
+				case GLFW_KEY_KP_2: boardView_->setMode(BoardView::symboles); return;
+				case GLFW_KEY_KP_3: boardView_->setMode(BoardView::smiley); return;
+				case GLFW_KEY_KP_4: boardView_->setMode(BoardView::romain); return;
+				case GLFW_KEY_KP_5: boardView_->setMode(BoardView::alphabet); return;
+				case GLFW_KEY_KP_6: AS = Play; return;
+			}
+		}
+
+		if (AS == HallOfFame)
+		{
+			switch (key)
+			{
+				case GLFW_KEY_KP_1: AS = Play; return;
+				case GLFW_KEY_KP_2: glfwSetWindowShouldClose(window_.get(), GL_TRUE); return;
 			}
 		}
 	}
@@ -211,9 +227,73 @@ void Application::Impl_::pushOnBoard(Board::Direction direction){
 	}
 }
 
-Application::Application(int argc, char** argv) :
-	impl_(new Impl_) {
+class Application::LifeManager_ : public non_copyable
+{
+public:
+	LifeManager_();
+	LifeManager_(GLFWwindow* window, BoardView* boardview);
 
+	GLFWwindow* window_;
+	BoardView* boardView_;
+
+	void setBoardView(BoardView* boardview);
+
+	void removeSquareAt(double xpos, double ypos);
+
+	static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+	void mouseEvent(int button, int action, int mods, double xpos, double ypos);
+
+
+};
+
+Application::LifeManager_::LifeManager_()
+{
+
+}
+
+Application::LifeManager_::LifeManager_(GLFWwindow* window, BoardView* boardview)
+	: window_(window) , boardView_(boardview)
+{
+
+}
+
+void Application::LifeManager_::setBoardView(BoardView* boardview)
+{
+	boardView_ = boardview;
+}
+
+void Application::LifeManager_::removeSquareAt(double xpos, double ypos)
+{
+	int x, y;
+	if (boardView_->contains(xpos, ypos))
+	{
+		boardView_->getCoordinates(xpos,ypos,x,y);
+		std::cout << "It seems like you have clicked square (" << x << "," << y << ").\n";
+	}
+	else std::cout << "It seems like you have missed !\n";
+}
+
+void Application::LifeManager_::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+{
+	double xpos, ypos;
+	glfwGetCursorPos(window, &xpos, &ypos);
+	app->lifeManager_->mouseEvent(button, action, mods, xpos, ypos);
+}
+
+void Application::LifeManager_::mouseEvent(int button, int action, int mod, double xpos, double ypos)
+{
+	if (action == GLFW_PRESS) {
+		switch (button)	{
+		case GLFW_MOUSE_BUTTON_LEFT:
+			removeSquareAt(xpos, ypos); 
+			return;
+		}
+	}
+}
+
+
+Application::Application(int argc, char** argv) :
+	impl_(new Impl_), lifeManager_(new LifeManager_(impl_->window_.get(),nullptr)) {
 	impl_->board_->setSquare(0, 0, 2);
 
 	assert(app == NULL);
@@ -221,8 +301,12 @@ Application::Application(int argc, char** argv) :
 
 	impl_->boardView_.reset(new BoardView(impl_->board_.get()));
 	impl_->scoreManager_.reset(new ScoreManager(impl_->board_.get()));
+
+	lifeManager_->setBoardView(impl_->boardView_.get());
+
 	// Set callback functions
 	glfwSetKeyCallback(impl_->window_.get(), Application::Impl_::keyCallBack);
+	glfwSetMouseButtonCallback(impl_->window_.get(), Application::LifeManager_::mouseButtonCallback);
 	glfwSetFramebufferSizeCallback(impl_->window_.get(),Application::Impl_::resizeCallback);
 
 	glfwWindowHint(GLFW_DEPTH_BITS, 16);

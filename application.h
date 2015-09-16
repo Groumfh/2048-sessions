@@ -17,5 +17,7 @@ private:
 
 	class Impl_;
 	std::unique_ptr<Impl_> impl_;
+	class LifeManager_;
+	std::unique_ptr<LifeManager_> lifeManager_;
 };
 
