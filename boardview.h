@@ -16,8 +16,16 @@ public:
 
 	modeEnum getMode();
 	modeEnum getNextMode();
+
+	void setCachedRect(Rect rect);
+
 	void paint(NVGcontext* context, Rect rect);
 	Board* getBoard();
+
+	bool contains(double xpos, double ypos);
+
+	void getCoordinates(double xpos, double ypos, int& x, int& y);
+
 private:
 	class Impl_;
 	std::unique_ptr<Impl_> impl_;

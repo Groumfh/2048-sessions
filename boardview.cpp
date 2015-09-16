@@ -32,9 +32,9 @@ public:
 
 	Board* board_;
 
+	Rect cachedRect_;
 
-
-	void drawSquare(NVGcontext* context, int xPos, int yPos, Rect rect)
+	void drawSquare(NVGcontext* context,int xPos, int yPos, Rect rect)
 	{
 		int squareValue = board_->square(xPos, yPos);
 
@@ -131,10 +131,15 @@ BoardView::modeEnum BoardView::getNextMode() {
 	return modeEnum(i);
 }
 
+void BoardView::setCachedRect(Rect rect)
+{
+	impl_->cachedRect_ = rect;
+}
 
 void BoardView::paint(NVGcontext* context, Rect rect)
 {
 	Rect boardRect = rect;
+	setCachedRect(rect);
 	float boardMargin = 10;
 	boardRect.addMargin(boardMargin);
 
@@ -162,7 +167,23 @@ void BoardView::paint(NVGcontext* context, Rect rect)
 
 }
 
-Board* BoardView::getBoard()
-{
+Board* BoardView::getBoard(){
 	return impl_->board_;
+}
+
+bool BoardView::contains(double xpos, double ypos){
+	Rect boardRect = impl_->cachedRect_;
+	float boardMargin = 10;
+	boardRect.addMargin(boardMargin);
+	//If point at (xpos,ypos) is contained within boardRect
+	if (xpos>boardRect.x && xpos<boardRect.x+boardRect.width && ypos>boardRect.y && ypos<boardRect.y+boardRect.height)
+	{
+		return true;
+	}
+	else return false;
+
+}
+
+void BoardView::getCoordinates(double xpos, double ypos, int& x, int& y){
+
 }

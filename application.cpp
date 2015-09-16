@@ -227,9 +227,72 @@ void Application::Impl_::pushOnBoard(Board::Direction direction){
 	}
 }
 
-Application::Application(int argc, char** argv) :
-	impl_(new Impl_) {
+class Application::LifeManager_ : public non_copyable
+{
+public:
+	LifeManager_();
+	LifeManager_(GLFWwindow* window, BoardView* boardview);
 
+	GLFWwindow* window_;
+	BoardView* boardView_;
+
+	void setBoardView(BoardView* boardview);
+
+	void removeSquareAt(double xpos, double ypos);
+
+	static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
+	void mouseEvent(int button, int action, int mods, double xpos, double ypos);
+
+
+};
+
+Application::LifeManager_::LifeManager_()
+{
+
+}
+
+Application::LifeManager_::LifeManager_(GLFWwindow* window, BoardView* boardview)
+	: window_(window) , boardView_(boardview)
+{
+
+}
+
+void Application::LifeManager_::setBoardView(BoardView* boardview)
+{
+	boardView_ = boardview;
+}
+
+void Application::LifeManager_::removeSquareAt(double xpos, double ypos)
+{
+	int x, y;
+	if (boardView_->contains(xpos, ypos))
+	{
+		std::cout << "Booyah !";
+	}
+	else std::cout << "You missed !";
+}
+
+void Application::LifeManager_::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+{
+	double xpos, ypos;
+	glfwGetCursorPos(window, &xpos, &ypos);
+	app->lifeManager_->mouseEvent(button, action, mods, xpos, ypos);
+}
+
+void Application::LifeManager_::mouseEvent(int button, int action, int mod, double xpos, double ypos)
+{
+	if (action == GLFW_PRESS) {
+		switch (button)	{
+		case GLFW_MOUSE_BUTTON_LEFT:
+			removeSquareAt(xpos, ypos); 
+			return;
+		}
+	}
+}
+
+
+Application::Application(int argc, char** argv) :
+	impl_(new Impl_), lifeManager_(new LifeManager_(impl_->window_.get(),nullptr)) {
 	impl_->board_->setSquare(0, 0, 2);
 
 	assert(app == NULL);
@@ -237,8 +300,12 @@ Application::Application(int argc, char** argv) :
 
 	impl_->boardView_.reset(new BoardView(impl_->board_.get()));
 	impl_->scoreManager_.reset(new ScoreManager(impl_->board_.get()));
+
+	lifeManager_->setBoardView(impl_->boardView_.get());
+
 	// Set callback functions
 	glfwSetKeyCallback(impl_->window_.get(), Application::Impl_::keyCallBack);
+	glfwSetMouseButtonCallback(impl_->window_.get(), Application::LifeManager_::mouseButtonCallback);
 	glfwSetFramebufferSizeCallback(impl_->window_.get(),Application::Impl_::resizeCallback);
 
 	glfwWindowHint(GLFW_DEPTH_BITS, 16);
