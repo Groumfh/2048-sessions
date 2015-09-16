@@ -236,6 +236,8 @@ public:
 	GLFWwindow* window_;
 	BoardView* boardView_;
 
+	int lives;
+
 	void setBoardView(BoardView* boardview);
 
 	void removeSquareAt(double xpos, double ypos);
@@ -247,12 +249,13 @@ public:
 };
 
 Application::LifeManager_::LifeManager_()
+	: lives(3)
 {
 
 }
 
 Application::LifeManager_::LifeManager_(GLFWwindow* window, BoardView* boardview)
-	: window_(window) , boardView_(boardview)
+	: window_(window) , boardView_(boardview), lives(3)
 {
 
 }
@@ -264,13 +267,22 @@ void Application::LifeManager_::setBoardView(BoardView* boardview)
 
 void Application::LifeManager_::removeSquareAt(double xpos, double ypos)
 {
+	if (lives == 0) 
+	{ 
+		return;
+	}
+		
 	int x, y;
 	if (boardView_->contains(xpos, ypos))
 	{
 		boardView_->getCoordinates(xpos,ypos,x,y);
-		std::cout << "It seems like you have clicked square (" << x << "," << y << ").\n";
+		if (boardView_->getBoard()->square(x, y))
+		{
+			boardView_->getBoard()->setSquare(x, y, 0);
+			lives -= 1;
+		}
+		return;
 	}
-	else std::cout << "It seems like you have missed !\n";
 }
 
 void Application::LifeManager_::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
