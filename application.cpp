@@ -52,7 +52,7 @@ public:
 Application::Impl_::Impl_():
 	window_(glfwCreateWindow( 300, 300, "2048", NULL, NULL),glfwDestroyWindow),
 	board_(new Board(4,4)),
-	achieve_(new Achievement()),
+	achieve_(new Achievement(board_.get())),
 	AS(Menu)
 {
 }
@@ -262,9 +262,7 @@ int Application::run()
 
 		impl_->paintEvent(context);
 
-		for (int i = 0; i < impl_->board_->height(); i++)
-			for (int j = 0; j < impl_->board_->width(); j++)
-				impl_->achieve_->CheckValue(impl_->board_->square(i, j));
+		impl_->achieve_->CheckBoard();
 
 		// Swap buffers
 		glfwSwapBuffers(impl_->window_.get());

@@ -21,14 +21,16 @@ enum Achieve
 class Achievement
 {
 public:
-	Achievement();
+	Achievement(Board * board);
 	~Achievement();
 
+	void CheckBoard();
 	void CheckValue(Board::ContentValue value);
 	void Popup(int num);
 	void PaintEvent(NVGcontext* context, Rect rect);
 
 private:
+	Board * board_;
 	int lastNumAchieve;
 	clock_t time_ ;
 	std::map<Achieve,std::pair<int, bool>> tabAchieve;

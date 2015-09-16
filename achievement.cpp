@@ -2,8 +2,9 @@
 
 
 
-Achievement::Achievement():
-	lastNumAchieve(0)
+Achievement::Achievement(Board *board):
+	lastNumAchieve(0),
+	board_(board)
 {
 	tabAchieve[Achieve::ACH_32] = std::make_pair(32, false);
 	tabAchieve[Achieve::ACH_64]   = std::make_pair(64, false);
@@ -27,6 +28,13 @@ Achievement::~Achievement()
 {
 }
 
+void Achievement::CheckBoard()
+{
+	for (int i = 0; i <board_->height(); i++)
+		for (int j = 0; j < board_->width(); j++)
+			CheckValue(board_->square(i, j));
+}
+
 void Achievement::CheckValue(Board::ContentValue value)
 {
 	for (std::map<Achieve, std::pair<int, bool>>::iterator it = tabAchieve.begin() ; it != tabAchieve.end() ; it++)
@@ -41,7 +49,6 @@ void Achievement::Popup(int num)
 {
 	lastNumAchieve = num;
 	time_ = clock();
-	//std::cout << "Hurra ! tu as atteins " << num << std::endl;
 }
 
 
@@ -72,7 +79,7 @@ void Achievement::PaintEvent(NVGcontext* context, Rect rect)
 		nvgFillColor(context, nvgRGBA(255, 0, 0, 255));
 		nvgFill(context);
 
-		// & display the game over
+		// & display the Achievement
 		std::string text(tabNameAchieve[lastNumAchieve]);
 		nvgBeginPath(context);
 		float x = 0;

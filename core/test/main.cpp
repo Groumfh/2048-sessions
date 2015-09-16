@@ -334,11 +334,6 @@ TEST(board, movable)
 	}
 }
 
-TEST(achievement, succes)
-{
-
-}
-
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
