@@ -267,9 +267,10 @@ void Application::LifeManager_::removeSquareAt(double xpos, double ypos)
 	int x, y;
 	if (boardView_->contains(xpos, ypos))
 	{
-		std::cout << "Booyah !";
+		boardView_->getCoordinates(xpos,ypos,x,y);
+		std::cout << "It seems like you have clicked square (" << x << "," << y << ").\n";
 	}
-	else std::cout << "You missed !";
+	else std::cout << "It seems like you have missed !\n";
 }
 
 void Application::LifeManager_::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)

@@ -139,9 +139,9 @@ void BoardView::setCachedRect(Rect rect)
 void BoardView::paint(NVGcontext* context, Rect rect)
 {
 	Rect boardRect = rect;
-	setCachedRect(rect);
 	float boardMargin = 10;
 	boardRect.addMargin(boardMargin);
+	setCachedRect(boardRect);
 
 	// draw border of board rect
 	nvgBeginPath(context);
@@ -173,8 +173,6 @@ Board* BoardView::getBoard(){
 
 bool BoardView::contains(double xpos, double ypos){
 	Rect boardRect = impl_->cachedRect_;
-	float boardMargin = 10;
-	boardRect.addMargin(boardMargin);
 	//If point at (xpos,ypos) is contained within boardRect
 	if (xpos>boardRect.x && xpos<boardRect.x+boardRect.width && ypos>boardRect.y && ypos<boardRect.y+boardRect.height)
 	{
@@ -185,5 +183,9 @@ bool BoardView::contains(double xpos, double ypos){
 }
 
 void BoardView::getCoordinates(double xpos, double ypos, int& x, int& y){
-
+	Rect boardRect = impl_->cachedRect_;
+	float squareWidth = boardRect.width / impl_->board_->width();
+	float squareHeight = boardRect.height / impl_->board_->height();
+	x = (int)((xpos - boardRect.x) / squareWidth);
+	y = (int)((ypos - boardRect.y) / squareHeight);
 }
