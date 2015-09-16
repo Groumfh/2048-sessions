@@ -21,6 +21,7 @@ namespace {
 		Menu,
 		Play,
 		Mode,
+		HallOfFame,
 		End
 	};
 
@@ -115,6 +116,11 @@ void Application::Impl_::paintEvent(NVGcontext* context){
 		//Mode graphic
 	}
 
+	if (AS == HallOfFame)
+	{
+		//Hall of Fame graphic
+	}
+
 	if (AS == End) {
 
 		// change the color of the board
@@ -175,13 +181,14 @@ void Application::Impl_::keyEvent(int key, int scancode, int action, int mods){
 		{
 			switch (key)
 			{
-				case GLFW_KEY_P: AS = Play; return;
-				case GLFW_KEY_S: AS = Mode; return;
-				case GLFW_KEY_E: glfwSetWindowShouldClose(window_.get(), GL_TRUE); return;
+				case GLFW_KEY_KP_1: AS = Play; return;
+				case GLFW_KEY_KP_2: AS = Mode; return;
+				case GLFW_KEY_KP_3: AS = HallOfFame; return;
+				case GLFW_KEY_KP_4: glfwSetWindowShouldClose(window_.get(), GL_TRUE); return;
 			}
 		}
 
-		if (AS==Mode)
+		if (AS == Mode)
 		{
 			switch (key)
 			{
@@ -191,6 +198,15 @@ void Application::Impl_::keyEvent(int key, int scancode, int action, int mods){
 				case GLFW_KEY_KP_4: boardView_->setMode(BoardView::romain); return;
 				case GLFW_KEY_KP_5: boardView_->setMode(BoardView::alphabet); return;
 				case GLFW_KEY_P: AS = Play; return;
+			}
+		}
+
+		if (AS == HallOfFame)
+		{
+			switch (key)
+			{
+				case GLFW_KEY_KP_1: AS = Play; return;
+				case GLFW_KEY_KP_2: glfwSetWindowShouldClose(window_.get(), GL_TRUE); return;
 			}
 		}
 	}
