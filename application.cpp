@@ -197,7 +197,7 @@ void Application::Impl_::keyEvent(int key, int scancode, int action, int mods){
 				case GLFW_KEY_KP_3: boardView_->setMode(BoardView::smiley); return;
 				case GLFW_KEY_KP_4: boardView_->setMode(BoardView::romain); return;
 				case GLFW_KEY_KP_5: boardView_->setMode(BoardView::alphabet); return;
-				case GLFW_KEY_P: AS = Play; return;
+				case GLFW_KEY_KP_6: AS = Play; return;
 			}
 		}
 
