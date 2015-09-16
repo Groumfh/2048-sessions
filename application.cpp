@@ -3,6 +3,7 @@
 
 #include <core/board.h>
 #include "boardview.h"
+#include "menu.h"
 #include "nvg.h"
 #include <achievement.h>
 #include <GLFW/glfw3.h>
@@ -18,7 +19,7 @@ namespace {
 	static Application* app = NULL;
 	enum AppState
 	{
-		Menu,
+		MainMenu,
 		Play,
 		Mode,
 		HallOfFame,
@@ -136,6 +137,7 @@ public:
 
 	std::unique_ptr<GLFWwindow,void(*)(GLFWwindow*)> window_;
 	std::unique_ptr<Board> board_;
+	std::unique_ptr<Menu> menu_;
 	std::unique_ptr<BoardView> boardView_;
 	std::unique_ptr<Achievement> achieve_;
 	std::unique_ptr<ScoreManager> scoreManager_;
@@ -155,7 +157,7 @@ Application::Impl_::Impl_():
 	window_(glfwCreateWindow( 300, 300, "2048", NULL, NULL),glfwDestroyWindow),
 	board_(new Board(4,4)),
 	achieve_(new Achievement(board_.get())),
-	AS(Menu)
+	AS(MainMenu)
 {
 }
 
@@ -208,15 +210,16 @@ void Application::Impl_::paintEvent(NVGcontext* context){
 
 	Rect livesRect(width - 50.f, 10.f, 45.f, 20);
 	app->lifeManager_->PaintEvent(context, livesRect);
-
-	if (AS == Menu)
+	if (AS == MainMenu)
 	{
 		//Start graphic
+		menu_->paint(context, boardRect, std::vector<char*>{ "1. Play", "2. Mode", "3. Hall of fame", "4. Quit"});
 	}
 
 	if (AS == Mode)
 	{
 		//Mode graphic
+		menu_->paint(context, boardRect, std::vector<char*>{ "1. Numeric", "2. Symboles", "3. Smiley", "4. Romains", "5. Alphabet", "6. Jouer" });
 	}
 
 	if (AS == HallOfFame)
@@ -280,7 +283,7 @@ void Application::Impl_::keyEvent(int key, int scancode, int action, int mods){
 			}
 		}
 
-		if (AS == Menu)
+		if (AS == MainMenu)
 		{
 			switch (key)
 			{
