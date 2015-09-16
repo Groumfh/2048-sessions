@@ -68,7 +68,7 @@ void Application::LifeManager_::setBoardView(BoardView* boardview)
 
 void Application::LifeManager_::removeSquareAt(double xpos, double ypos)
 {
-	if (lives == 0)
+	if (lives <= 0)
 	{
 		return;
 	}
@@ -392,7 +392,7 @@ int Application::run()
 		glfwPollEvents();
 
 		// test if end is occured
-		if (!impl_->board_->isMovable() && impl_->AS!=End) {
+		if (!impl_->board_->isMovable() && impl_->AS!=End && lifeManager_->lives<=0) {
 			impl_->AS=End;
 		}
 	}
