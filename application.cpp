@@ -61,13 +61,16 @@ void Application::Impl_::keyCallBack(GLFWwindow* window, int key, int scancode, 
 }
 
 void Application::Impl_::paintEvent(NVGcontext* context){
-	float pxRatio = 1.f;
-	int width, height;
-	glfwGetFramebufferSize(window_.get(), &width, &height);
-	nvgBeginFrame(context, width, height, pxRatio);
 
-	Rect textRect(0.f,10.f,width,20.f);
-	Rect boardMaxRect(0.f,textRect.height + textRect.y,width,height - textRect.height);
+	int winWidth, winHeight;
+	glfwGetWindowSize(window_.get(), &winWidth, &winHeight);
+	int fWidth, fHeight;
+	glfwGetFramebufferSize(window_.get(), &fWidth, &fHeight);
+	float pxRatio = (float)fWidth / (float)winWidth;
+	nvgBeginFrame(context, winWidth, winHeight, pxRatio);
+
+	Rect textRect(0.f,10.f,winWidth,20.f);
+	Rect boardMaxRect(0.f,textRect.height + textRect.y,winWidth,winHeight - textRect.height);
 
 	float boardSizeMin = std::min(boardMaxRect.width,boardMaxRect.height);
 	Rect boardRect(20.f, 20.f + textRect.height,boardSizeMin-40.f, boardSizeMin-40.f);
