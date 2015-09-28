@@ -1,5 +1,7 @@
 #include "menu.h"
 
+#include "drawutils.h"
+
 #include <nvg.h>
 #include <GLFW/glfw3.h>
 
@@ -9,21 +11,6 @@
 #include <algorithm>
 #include <string>
 
-namespace {
-
-	void drawShadow(NVGcontext* context, Rect rect) {
-
-		NVGpaint shadowPaint = nvgBoxGradient(context, rect + Rect(2, 2, 0, 0), 5 * 2, 10, nvgRGBA(0, 0, 0, 128), nvgRGBA(0, 0, 0, 0));
-		nvgBeginPath(context);
-		nvgRect(context, rect + Rect(-10, -10, 20, 20));
-		nvgRoundedRect(context, rect, 5);
-		nvgPathWinding(context, NVG_HOLE);
-		nvgFillPaint(context, shadowPaint);
-		nvgFill(context);
-		nvgClosePath(context);
-	}
-
-}
 
 class Menu::Impl_ : public non_copyable
 {
@@ -31,20 +18,6 @@ public:
 
 	Board* board_;
 
-	NVGcolor color(int value) {
-		std::map<int, NVGcolor>::iterator it = colors_.find(value);
-		if (it != colors_.end()) {
-			return it->second;
-		}
-
-		static std::default_random_engine generator;
-		std::uniform_int_distribution<int> distribution(50, 255);
-		NVGcolor color = nvgRGBA(distribution(generator), distribution(generator), distribution(generator), 255);
-		colors_[value] = color;
-		return color;
-	}
-
-	std::map<int, NVGcolor> colors_;
 };
 
 
