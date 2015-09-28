@@ -73,6 +73,7 @@ set(SOURCES
 	menu.cpp
 	achievement.cpp
 	scoremanager.cpp
+	lifemanager.cpp
 	${GLEW_SOURCES}
 	${NANVOG_SOURCES})
 

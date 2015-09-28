@@ -6,6 +6,7 @@
 #include "menu.h"
 #include "nvg.h"
 #include <achievement.h>
+#include "lifemanager.h"
 #include <GLFW/glfw3.h>
 
 #include <random>
@@ -28,107 +29,6 @@ namespace {
 
 }
 
-//Might be a better idea to separate this from the rest
-class Application::LifeManager_ : public non_copyable
-{
-public:
-	LifeManager_();
-	LifeManager_(GLFWwindow* window, BoardView* boardview);
-
-	GLFWwindow* window_;
-	BoardView* boardView_;
-
-	int lives;
-
-	void setBoardView(BoardView* boardview);
-
-	void removeSquareAt(double xpos, double ypos);
-
-	static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
-	void mouseEvent(int button, int action, int mods, double xpos, double ypos);
-
-	void PaintEvent(NVGcontext* context, Rect rect);
-};
-
-Application::LifeManager_::LifeManager_()
-	: lives(3)
-{
-
-}
-
-Application::LifeManager_::LifeManager_(GLFWwindow* window, BoardView* boardview)
-	: window_(window), boardView_(boardview), lives(3)
-{
-
-}
-
-void Application::LifeManager_::setBoardView(BoardView* boardview)
-{
-	boardView_ = boardview;
-}
-
-void Application::LifeManager_::removeSquareAt(double xpos, double ypos)
-{
-	if (lives <= 0)
-	{
-		return;
-	}
-
-	int x, y;
-	if (boardView_->contains(xpos, ypos))
-	{
-		boardView_->getCoordinates(xpos, ypos, x, y);
-		if (boardView_->getBoard()->square(x, y))
-		{
-			boardView_->getBoard()->setSquare(x, y, 0);
-			lives -= 1;
-		}
-		return;
-	}
-}
-
-void Application::LifeManager_::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
-{
-	double xpos, ypos;
-	glfwGetCursorPos(window, &xpos, &ypos);
-	app->lifeManager_->mouseEvent(button, action, mods, xpos, ypos);
-}
-
-void Application::LifeManager_::mouseEvent(int button, int action, int mod, double xpos, double ypos)
-{
-	if (action == GLFW_PRESS) {
-		switch (button) {
-		case GLFW_MOUSE_BUTTON_LEFT:
-			removeSquareAt(xpos, ypos);
-			return;
-		}
-	}
-}
-
-void Application::LifeManager_::PaintEvent(NVGcontext* context, Rect rect)
-{
-	Rect textRect(rect);
-
-	//Display number of remaining lives
-	std::string text(std::to_string(lives));
-	nvgBeginPath(context);
-	float x = 0;
-	float y = 0;
-	textRect.center(x, y);
-	nvgFontSize(context, 20);
-	nvgFontFace(context, "sans");
-	nvgTextAlign(context, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
-	nvgFill(context);
-	nvgFillColor(context, nvgRGBA(0, 0, 0, 255));
-	nvgText(context, x + 1, y + 1, text.c_str(), NULL);
-	nvgFillColor(context, nvgRGBA(200, 20, 20, 255));
-	nvgText(context, x, y, text.c_str(), NULL);
-	nvgClosePath(context);
-
-}
-
-//There
-
 class Application::Impl_ : public non_copyable
 {
 public:
@@ -141,11 +41,13 @@ public:
 	std::unique_ptr<BoardView> boardView_;
 	std::unique_ptr<Achievement> achieve_;
 	std::unique_ptr<ScoreManager> scoreManager_;
+	std::unique_ptr<LifeManager> lifeManager_;
 
 	AppState AS;
 
 	static void resizeCallback(GLFWwindow* window, int width, int height);
 	static void keyCallBack(GLFWwindow* window, int key, int scancode, int action, int mods);
+	static void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 
 	void paintEvent(NVGcontext* context);
 	void keyEvent(int key, int scancode, int action, int mods);
@@ -157,6 +59,7 @@ Application::Impl_::Impl_():
 	window_(glfwCreateWindow( 300, 300, "2048", NULL, NULL),glfwDestroyWindow),
 	board_(new Board(4,4)),
 	achieve_(new Achievement(board_.get())),
+	lifeManager_(new LifeManager(window_.get(), nullptr)),
 	AS(MainMenu)
 {
 }
@@ -175,6 +78,12 @@ void Application::Impl_::resizeCallback(GLFWwindow* window, int width, int heigh
 
 void Application::Impl_::keyCallBack(GLFWwindow* window, int key, int scancode, int action, int mods){
 	app->impl_->keyEvent(key,scancode,action,mods);
+}
+
+void Application::Impl_::mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
+	double xpos, ypos;
+	glfwGetCursorPos(window, &xpos, &ypos);
+	app->impl_->lifeManager_.get()->mouseEvent(button, action, mods, xpos, ypos);
 }
 
 void Application::Impl_::paintEvent(NVGcontext* context){
@@ -203,7 +112,6 @@ void Application::Impl_::paintEvent(NVGcontext* context){
 	nvgClosePath(context);
 
 	Rect livesRect(width - 50.f, 10.f, 45.f, 20);
-	app->lifeManager_->PaintEvent(context, livesRect);
 	if (AS == MainMenu)
 	{
 		//Start graphic
@@ -226,6 +134,7 @@ void Application::Impl_::paintEvent(NVGcontext* context){
 	{
 		// draw the board
 		boardView_->paint(context, boardRect);
+		lifeManager_->paint(context, livesRect);
 	}
 
 	if (AS == End) {
@@ -339,7 +248,7 @@ void Application::Impl_::pushOnBoard(Board::Direction direction){
 
 
 Application::Application(int argc, char** argv) :
-	impl_(new Impl_), lifeManager_(new LifeManager_(impl_->window_.get(),nullptr)) {
+	impl_(new Impl_) {
 	impl_->board_->setSquare(0, 0, 2);
 
 	assert(app == NULL);
@@ -348,11 +257,11 @@ Application::Application(int argc, char** argv) :
 	impl_->boardView_.reset(new BoardView(impl_->board_.get()));
 	impl_->scoreManager_.reset(new ScoreManager(impl_->board_.get()));
 
-	lifeManager_->setBoardView(impl_->boardView_.get());
+	impl_->lifeManager_->setBoardView(impl_->boardView_.get());
 
 	// Set callback functions
 	glfwSetKeyCallback(impl_->window_.get(), Application::Impl_::keyCallBack);
-	glfwSetMouseButtonCallback(impl_->window_.get(), Application::LifeManager_::mouseButtonCallback);
+	glfwSetMouseButtonCallback(impl_->window_.get(), Application::Impl_::mouseButtonCallback);
 	glfwSetFramebufferSizeCallback(impl_->window_.get(),Application::Impl_::resizeCallback);
 
 	glfwWindowHint(GLFW_DEPTH_BITS, 16);
@@ -399,7 +308,7 @@ int Application::run()
 		glfwPollEvents();
 
 		// test if end is occured
-		if (!impl_->board_->isMovable() && impl_->AS!=End && lifeManager_->lives<=0) {
+		if (!impl_->board_->isMovable() && impl_->AS!=End && impl_->lifeManager_->lives<=0) {
 			impl_->AS=End;
 		}
 	}
