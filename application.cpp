@@ -19,11 +19,11 @@ namespace {
 	static Application* app = NULL;
 	enum AppState
 	{
-		MainMenu,
-		Play,
-		Mode,
-		HallOfFame,
-		End
+		APPSTATE_MENU,
+		APPSTATE_PLAY,
+		APPSTATE_MODE,
+		APPSTATE_HALLOFFAME,
+		APPSTATE_END
 	};
 
 }
@@ -142,7 +142,7 @@ public:
 	std::unique_ptr<Achievement> achieve_;
 	std::unique_ptr<ScoreManager> scoreManager_;
 
-	AppState AS;
+	AppState appState;
 
 	static void resizeCallback(GLFWwindow* window, int width, int height);
 	static void keyCallBack(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -157,7 +157,7 @@ Application::Impl_::Impl_():
 	window_(glfwCreateWindow( 300, 300, "2048", NULL, NULL),glfwDestroyWindow),
 	board_(new Board(4,4)),
 	achieve_(new Achievement(board_.get())),
-	AS(MainMenu)
+	appState(APPSTATE_MENU)
 {
 }
 
@@ -204,31 +204,31 @@ void Application::Impl_::paintEvent(NVGcontext* context){
 
 	Rect livesRect(width - 50.f, 10.f, 45.f, 20);
 	app->lifeManager_->PaintEvent(context, livesRect);
-	if (AS == MainMenu)
+	if (appState == APPSTATE_MENU)
 	{
 		//Start graphic
 		menu_->paint(context, boardRect, std::vector<char*>{ "1. Play", "2. Mode", "3. Hall of fame", "4. Quit"});
 	}
 
-	if (AS == Mode)
+	if (appState == APPSTATE_MODE)
 	{
 		//Mode graphic
 		menu_->paint(context, boardRect, std::vector<char*>{ "1. Numeric", "2. Symboles", "3. Smiley", "4. Alphabet", "5. Romains", "6. Jouer" }, boardView_->getMode());
 	}
 
-	if (AS == HallOfFame)
+	if (appState == APPSTATE_HALLOFFAME)
 	{
 		//Hall of Fame graphic
 		menu_->paint(context, boardRect, std::vector<char*>{ "1.", "2.", "3.", "4.", "5.", "6.","btn2"});
 	}
 
-	if (AS == Play)
+	if (appState == APPSTATE_PLAY)
 	{
 		// draw the board
 		boardView_->paint(context, boardRect);
 	}
 
-	if (AS == End) {
+	if (appState == APPSTATE_END) {
 
 		// change the color of the board
 		nvgBeginPath(context);
@@ -266,7 +266,7 @@ void Application::Impl_::paintEvent(NVGcontext* context){
 void Application::Impl_::keyEvent(int key, int scancode, int action, int mods){
 
 	if (action == GLFW_PRESS) {
-		if (AS == Play)
+		if (appState == APPSTATE_PLAY)
 		{
 			switch (key)
 			{
@@ -287,18 +287,18 @@ void Application::Impl_::keyEvent(int key, int scancode, int action, int mods){
 			}
 		}
 
-		if (AS == MainMenu)
+		if (appState == APPSTATE_MENU)
 		{
 			switch (key)
 			{
-				case GLFW_KEY_KP_1: AS = Play; return;
-				case GLFW_KEY_KP_2: AS = Mode; return;
-				case GLFW_KEY_KP_3: AS = HallOfFame; return;
+				case GLFW_KEY_KP_1: appState = APPSTATE_PLAY; return;
+				case GLFW_KEY_KP_2: appState = APPSTATE_MODE; return;
+				case GLFW_KEY_KP_3: appState = APPSTATE_HALLOFFAME; return;
 				case GLFW_KEY_KP_4: glfwSetWindowShouldClose(window_.get(), GL_TRUE); return;
 			}
 		}
 
-		if (AS == Mode)
+		if (appState == APPSTATE_MODE)
 		{
 			switch (key)
 			{
@@ -307,15 +307,15 @@ void Application::Impl_::keyEvent(int key, int scancode, int action, int mods){
 				case GLFW_KEY_KP_3: boardView_->setMode(BoardView::smiley); return;
 				case GLFW_KEY_KP_4: boardView_->setMode(BoardView::alphabet); return;
 				case GLFW_KEY_KP_5: boardView_->setMode(BoardView::romain); return;
-				case GLFW_KEY_KP_6: AS = Play; return;
+				case GLFW_KEY_KP_6: appState = APPSTATE_PLAY; return;
 			}
 		}
 
-		if (AS == HallOfFame)
+		if (appState == APPSTATE_HALLOFFAME)
 		{
 			switch (key)
 			{
-				case GLFW_KEY_KP_1: AS = Play; return;
+				case GLFW_KEY_KP_1: appState = APPSTATE_PLAY; return;
 				case GLFW_KEY_KP_2: glfwSetWindowShouldClose(window_.get(), GL_TRUE); return;
 			}
 		}
@@ -323,7 +323,7 @@ void Application::Impl_::keyEvent(int key, int scancode, int action, int mods){
 }
 
 void Application::Impl_::pushOnBoard(Board::Direction direction){
-	if (AS==End) return;
+	if (appState == APPSTATE_END) return;
 
 	if (board_->push(direction).changed()){
 		// generate a random square
@@ -399,8 +399,8 @@ int Application::run()
 		glfwPollEvents();
 
 		// test if end is occured
-		if (!impl_->board_->isMovable() && impl_->AS!=End && lifeManager_->lives<=0) {
-			impl_->AS=End;
+		if (!impl_->board_->isMovable() && impl_->appState != APPSTATE_END && lifeManager_->lives<=0) {
+			impl_->appState = APPSTATE_END;
 		}
 	}
 	return 0;
