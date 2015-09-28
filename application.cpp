@@ -111,7 +111,7 @@ void Application::Impl_::paintEvent(NVGcontext* context){
 	nvgFill(context);
 	nvgClosePath(context);
 
-	Rect livesRect(width - 50.f, 10.f, 45.f, 20);
+	Rect livesRect(width - 60.f, 10.f, 45.f, 20);
 	if (AS == MainMenu)
 	{
 		//Start graphic

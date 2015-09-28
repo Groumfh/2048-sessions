@@ -17,8 +17,6 @@ public:
 	modeEnum getMode();
 	modeEnum getNextMode();
 
-	void setCachedRect(Rect rect);
-
 	void paint(NVGcontext* context, Rect rect);
 	Board* getBoard();
 

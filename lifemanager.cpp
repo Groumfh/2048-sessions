@@ -3,12 +3,6 @@
 #include "nvg.h"
 #include <sstream>
 
-LifeManager::LifeManager()
-	: lives(3)
-{
-
-}
-
 LifeManager::LifeManager(GLFWwindow* window, BoardView* boardview)
 	: window_(window), boardView_(boardview), lives(3)
 {
@@ -58,7 +52,7 @@ void LifeManager::paint(NVGcontext* context, Rect rect)
 	Rect textRect(rect);
 
 	//Display number of remaining lives
-	std::string text(std::to_string(lives));
+	std::string text("Lives : "+std::to_string(lives));
 	nvgBeginPath(context);
 	float x = 0;
 	float y = 0;

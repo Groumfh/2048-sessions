@@ -6,7 +6,6 @@
 class LifeManager
 {
 public:
-	LifeManager();
 	LifeManager(GLFWwindow* window, BoardView* boardview);
 
 	GLFWwindow* window_;
