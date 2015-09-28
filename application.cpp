@@ -177,6 +177,15 @@ void Application::Impl_::keyCallBack(GLFWwindow* window, int key, int scancode, 
 	app->impl_->keyEvent(key,scancode,action,mods);
 }
 
+std::vector <std::string> Application::createMenu()
+{
+	std::vector <std::string> menu[APPSTATE_END];
+	for (int i = 0; i < APPSTATE_END; i++)
+	{
+		menu[i] ;
+	}
+}
+
 void Application::Impl_::paintEvent(NVGcontext* context){
 	float pxRatio = 1.f;
 	int width, height;
