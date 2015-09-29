@@ -70,6 +70,10 @@ set(SOURCES
 	nvg.cpp
 	glfw.cpp
 	boardview.cpp
+	menu.cpp
+	achievementmanager.cpp
+	scoremanager.cpp
+	lifemanager.cpp
 	${GLEW_SOURCES}
 	${NANVOG_SOURCES})
 
