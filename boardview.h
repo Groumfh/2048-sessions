@@ -18,7 +18,7 @@ public:
 	modeEnum getNextMode();
 
 	void paint(NVGcontext* context, Rect rect);
-	Board* getBoard();
+	Board* getBoard() const;
 
 	bool contains(double xpos, double ypos);
 

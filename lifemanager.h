@@ -8,10 +8,7 @@ class LifeManager
 public:
 	LifeManager(GLFWwindow* window, BoardView* boardview);
 
-	GLFWwindow* window_;
-	BoardView* boardView_;
 
-	int lives;
 
 	void setBoardView(BoardView* boardview);
 
@@ -20,4 +17,13 @@ public:
 	void mouseEvent(int button, int action, int mods, double xpos, double ypos);
 
 	void paint(NVGcontext* context, Rect rect);
+
+	int getLives() const;
+
+private:
+	GLFWwindow* window_;
+	BoardView* boardView_;
+
+	int lives_;
+
 };

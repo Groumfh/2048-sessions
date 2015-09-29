@@ -38,14 +38,6 @@ public:
 	{
 		int squareValue = board_->square(xPos, yPos);
 
-		/*	switch (mode)
-			{
-			default:
-				break;
-			}*/
-
-			// draw text
-		//mode;
 		if (squareValue != 0)
 		{
 			Rect squareRect = rect;
@@ -162,7 +154,7 @@ void BoardView::paint(NVGcontext* context, Rect rect)
 
 }
 
-Board* BoardView::getBoard(){
+Board* BoardView::getBoard() const{
 	return impl_->board_;
 }
 

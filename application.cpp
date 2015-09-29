@@ -308,7 +308,7 @@ int Application::run()
 		glfwPollEvents();
 
 		// test if end is occured
-		if (!impl_->board_->isMovable() && impl_->AS!=End && impl_->lifeManager_->lives<=0) {
+		if (!impl_->board_->isMovable() && impl_->AS!=End && impl_->lifeManager_->getLives()<=0) {
 			impl_->AS=End;
 		}
 	}

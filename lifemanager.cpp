@@ -4,7 +4,7 @@
 #include <sstream>
 
 LifeManager::LifeManager(GLFWwindow* window, BoardView* boardview)
-	: window_(window), boardView_(boardview), lives(3)
+	: window_(window), boardView_(boardview), lives_(3)
 {
 
 }
@@ -16,7 +16,7 @@ void LifeManager::setBoardView(BoardView* boardview)
 
 void LifeManager::removeSquareAt(double xpos, double ypos)
 {
-	if (lives <= 0)
+	if (lives_ <= 0)
 	{
 		return;
 	}
@@ -28,7 +28,7 @@ void LifeManager::removeSquareAt(double xpos, double ypos)
 		if (boardView_->getBoard()->square(x, y))
 		{
 			boardView_->getBoard()->setSquare(x, y, 0);
-			lives -= 1;
+			lives_ -= 1;
 		}
 		return;
 	}
@@ -52,7 +52,7 @@ void LifeManager::paint(NVGcontext* context, Rect rect)
 	Rect textRect(rect);
 
 	//Display number of remaining lives
-	std::string text("Lives : "+std::to_string(lives));
+	std::string text("Lives : "+std::to_string(lives_));
 	nvgBeginPath(context);
 	float x = 0;
 	float y = 0;
@@ -67,4 +67,8 @@ void LifeManager::paint(NVGcontext* context, Rect rect)
 	nvgText(context, x, y, text.c_str(), NULL);
 	nvgClosePath(context);
 
+}
+
+int LifeManager::getLives() const {
+	return lives_;
 }
