@@ -71,7 +71,7 @@ set(SOURCES
 	glfw.cpp
 	boardview.cpp
 	menu.cpp
-	achievement.cpp
+	achievementmanager.cpp
 	scoremanager.cpp
 	lifemanager.cpp
 	${GLEW_SOURCES}

@@ -5,7 +5,7 @@
 #include "boardview.h"
 #include "menu.h"
 #include "nvg.h"
-#include <achievement.h>
+#include "achievementmanager.h"
 #include "lifemanager.h"
 #include <GLFW/glfw3.h>
 
@@ -39,7 +39,7 @@ public:
 	std::unique_ptr<Board> board_;
 	std::unique_ptr<Menu> menu_;
 	std::unique_ptr<BoardView> boardView_;
-	std::unique_ptr<Achievement> achieve_;
+	std::unique_ptr<AchievementManager> achieve_;
 	std::unique_ptr<ScoreManager> scoreManager_;
 	std::unique_ptr<LifeManager> lifeManager_;
 
@@ -58,7 +58,7 @@ public:
 Application::Impl_::Impl_():
 	window_(glfwCreateWindow( 300, 300, "2048", NULL, NULL),glfwDestroyWindow),
 	board_(new Board(4,4)),
-	achieve_(new Achievement(board_.get())),
+	achieve_(new AchievementManager(board_.get())),
 	lifeManager_(new LifeManager(window_.get(), nullptr)),
 	AS(MainMenu)
 {
@@ -167,7 +167,7 @@ void Application::Impl_::paintEvent(NVGcontext* context){
 	}
 
 	Rect achieveRect(5.f, boardMaxRect.width - 50.f, 100.f, 40.f);
-	achieve_->PaintEvent(context, achieveRect);
+	achieve_->paintEvent(context, achieveRect);
 
 	nvgEndFrame(context);
 }
@@ -301,7 +301,7 @@ int Application::run()
 
 		impl_->paintEvent(context);
 
-		impl_->achieve_->CheckBoard();
+		impl_->achieve_->checkBoard();
 
 		// Swap buffers
 		glfwSwapBuffers(impl_->window_.get());
