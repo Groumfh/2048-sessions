@@ -23,7 +23,8 @@ namespace {
 		APPSTATE_PLAY,
 		APPSTATE_MODE,
 		APPSTATE_HALLOFFAME,
-		APPSTATE_END
+		APPSTATE_END,
+		APPSTATE_COUNT
 	};
 
 }
@@ -150,6 +151,9 @@ public:
 	void paintEvent(NVGcontext* context);
 	void keyEvent(int key, int scancode, int action, int mods);
 
+	std::vector<char*> createMenu();
+	std::vector<char*> createMenuMode();
+
 	void pushOnBoard(Board::Direction direction);
 };
 
@@ -177,15 +181,43 @@ void Application::Impl_::keyCallBack(GLFWwindow* window, int key, int scancode, 
 	app->impl_->keyEvent(key,scancode,action,mods);
 }
 
-std::vector <std::string> Application::createMenu()
+std::vector <char*> Application::Impl_::createMenu()
 {
-	std::vector <std::string> menu[APPSTATE_END];
+	std::vector <char*> menu(APPSTATE_END);
 	for (int i = 0; i < APPSTATE_END; i++)
 	{
-		menu[i] ;
+		char* t;
+		switch (i+1)
+		{
+			case APPSTATE_PLAY:
+			{
+				t = "Play";
+				break;
+			}
+			case APPSTATE_MODE:
+			{
+				t = "Mode";
+				break;
+			}
+			case APPSTATE_HALLOFFAME:
+			{
+				t = "Hall of Fame";
+				break;
+			}
+			case APPSTATE_END:
+			{
+				t = "Exit";
+				break;
+			}
+		
+		}
+		std::stringstream str;
+		str << i+1;
+		std::string s = str.str();
+		menu[i] = strdup((s + ". " + std::string(t)).c_str());
 	}
+	return menu;
 }
-
 void Application::Impl_::paintEvent(NVGcontext* context){
 	float pxRatio = 1.f;
 	int width, height;
@@ -213,12 +245,70 @@ void Application::Impl_::paintEvent(NVGcontext* context){
 
 	Rect livesRect(width - 50.f, 10.f, 45.f, 20);
 	app->lifeManager_->PaintEvent(context, livesRect);
-	if (appState == APPSTATE_MENU)
+
+	switch (appState)
+	{
+		case APPSTATE_MENU:
+		{
+			menu_->paint(context, boardRect, createMenu());
+			break;
+		}
+		
+		case APPSTATE_PLAY:
+		{
+			boardView_->paint(context, boardRect);
+			break;
+		}
+		
+		case APPSTATE_MODE:
+		{
+			menu_->paint(context, boardRect, std::vector<char*>{ "1. Numeric", "2. Symboles", "3. Smiley", "4. Alphabet", "5. Romains", "6. Jouer" }, boardView_->getMode());
+			break;
+		}
+		
+		case APPSTATE_HALLOFFAME:
+		{
+			menu_->paint(context, boardRect, std::vector<char*>{ "1.", "2.", "3.", "4.", "5.", "6.", "btn2"});
+			break;
+		}
+		
+		case APPSTATE_END:
+		{
+			// change the color of the board
+			nvgBeginPath(context);
+			nvgFillColor(context, nvgRGBA(0, 0, 0, 30));
+			nvgRect(context, boardMaxRect);
+			nvgFill(context);
+			nvgClosePath(context);
+
+			// & display the game over
+			int score = scoreManager_->calculScore();
+			std::stringstream ss;
+			ss << score;
+			std::string str = ss.str();
+			std::string text("GAME OVER     SCORE " + str);
+			nvgBeginPath(context);
+			float x = 0;
+			float y = 0;
+			textRect.center(x, y);
+			nvgFontSize(context, 20);
+			nvgFontFace(context, "sans");
+			nvgTextAlign(context, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
+			nvgFill(context);
+			nvgFillColor(context, nvgRGBA(0, 0, 0, 255));
+			nvgText(context, x + 1, y + 1, text.c_str(), NULL);
+			nvgFillColor(context, nvgRGBA(200, 20, 20, 255));
+			nvgText(context, x, y, text.c_str(), NULL);
+			break;
+		}
+		
+	}
+/*	if (appState == APPSTATE_MENU)
 	{
 		//Start graphic
 		menu_->paint(context, boardRect, std::vector<char*>{ "1. Play", "2. Mode", "3. Hall of fame", "4. Quit"});
 	}
-
+	//std::vector<char*>{ "1. Play", "2. Mode", "3. Hall of fame", "4. Quit"}
 	if (appState == APPSTATE_MODE)
 	{
 		//Mode graphic
@@ -264,7 +354,7 @@ void Application::Impl_::paintEvent(NVGcontext* context){
 		nvgText(context,x+1,y+1,text.c_str(),NULL);
 		nvgFillColor(context, nvgRGBA(200,20,20,255));
 		nvgText(context,x,y,text.c_str(),NULL);
-	}
+	}*/
 
 	Rect achieveRect(5.f, boardMaxRect.width - 50.f, 100.f, 40.f);
 	achieve_->PaintEvent(context, achieveRect);
