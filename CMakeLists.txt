@@ -18,32 +18,24 @@ include(ExternalProject)
 # third parties
 # *********************************************
 
-#OpenGL
+# OpenGL
 find_package(OpenGL REQUIRED)
+add_library(opengl INTERFACE)
+target_link_libraries(opengl INTERFACE ${OPENGL_LIBRARIES})
+target_include_directories(opengl INTERFACE ${OPENGL_INCLUDE_DIR})
 
 #gtest
-set(GTEST_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/third_party/gtest)
-find_package(GTest REQUIRED)
-include_directories(${GTEST_INCLUDE_DIRS})
+set(GTEST_ROOT third_party/googletest/googletest)
+add_library(gtest ${GTEST_ROOT}/src/gtest-all.cc)
+target_include_directories(gtest PUBLIC ${GTEST_ROOT} ${GTEST_ROOT}/include)
 
 # nanovg
-set(NANVOG_SOURCES
-	${CMAKE_CURRENT_SOURCE_DIR}/third_party/nanovg/src/nanovg.c)
-add_library(nanovg STATIC ${NANVOG_SOURCES})
+add_library(nanovg STATIC ${CMAKE_CURRENT_SOURCE_DIR}/third_party/nanovg/src/nanovg.c)
 target_include_directories(nanovg PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/third_party/nanovg/src)
+target_link_libraries(nanovg PRIVATE opengl)
 
 # glfw
 add_subdirectory(third_party/glfw)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/glfw/include)
-
-# glew
-add_definitions(-DGLEW_STATIC)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/glew-1.13.0/include)
-set(GLEW_SOURCES
-	${CMAKE_CURRENT_SOURCE_DIR}/third_party/glew-1.13.0/src/glew.c)
-if(WIN32)
-	link_directories(${CMAKE_CURRENT_SOURCE_DIR}/third_party/glew-1.13.0/lib/Release/x64)
-endif(WIN32)
 
 # *********************************************
 # libaries

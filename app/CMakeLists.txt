@@ -5,8 +5,7 @@ set(SOURCES
 	src/application.cpp
 	src/nvg.cpp
 	src/glfw.cpp
-	src/boardview.cpp
-	${GLEW_SOURCES})
+	src/boardview.cpp)
 
 # *********************************************
 # configure
@@ -25,8 +24,4 @@ add_executable(2048-sessions ${SOURCES})
 target_include_directories(2048-sessions
 	PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/resources)
 target_link_libraries(2048-sessions
-	PUBLIC core glfw nanovg ${OPENGL_LIBRARIES} ${GLFW_LIBRARIES})
-
-if(WIN32)
-	target_link_libraries(2048-sessions ${GLEW_LIBRARY} glu32 opengl32)
-endif(WIN32)
+	PUBLIC core glfw nanovg)
