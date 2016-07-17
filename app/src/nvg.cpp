@@ -1,6 +1,6 @@
 #include "nvg.h"
 
-#include <GLFW/glfw3.h>
+#include <OpenGL/gl.h>
 
 #define NANOVG_GL2
 #include <nanovg_gl.h>

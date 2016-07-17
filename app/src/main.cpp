@@ -28,6 +28,6 @@ int main(int argc, char **argv){
 	NVG::stop();
 	GLFW::stop();
 
-	return result; // 1011
+	return result;
 }
 
