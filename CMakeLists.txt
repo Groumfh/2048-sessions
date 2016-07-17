@@ -27,10 +27,10 @@ find_package(GTest REQUIRED)
 include_directories(${GTEST_INCLUDE_DIRS})
 
 # nanovg
-set(NANVOG_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/third_party/nanovg/src)
-include_directories(${NANVOG_INCLUDE_DIRS})
 set(NANVOG_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/third_party/nanovg/src/nanovg.c)
+add_library(nanovg STATIC ${NANVOG_SOURCES})
+target_include_directories(nanovg PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/third_party/nanovg/src)
 
 # glfw
 add_subdirectory(third_party/glfw)
@@ -48,40 +48,9 @@ endif(WIN32)
 # *********************************************
 # libaries
 # *********************************************
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+add_subdirectory(base)
 add_subdirectory(core)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/core/include)
-
-# *********************************************
-# configure
-# *********************************************
-# configure embedded resources path ----------
-set(RESOURCES_PATH "${CMAKE_CURRENT_SOURCE_DIR}/resources/")
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/resources/resources_path.h.in
-	${CMAKE_CURRENT_BINARY_DIR}/resources/resources_path.h)
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/resources)
-
-# *********************************************
-# 2048 executable
-# *********************************************
-set(SOURCES
-	main.cpp
-	application.cpp
-	nvg.cpp
-	glfw.cpp
-	boardview.cpp
-	${GLEW_SOURCES}
-	${NANVOG_SOURCES})
-
-add_executable(2048-sessions ${SOURCES})
-target_link_libraries(2048-sessions
-	core
-	glfw
-	${OPENGL_LIBRARIES}
-	${GLFW_LIBRARIES})
-if(WIN32)
-	target_link_libraries(2048-sessions ${GLEW_LIBRARY} glu32 opengl32)
-endif(WIN32)
+add_subdirectory(app)
 
 # *********************************************
 # Exercises

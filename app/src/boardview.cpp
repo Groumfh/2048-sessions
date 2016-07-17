@@ -1,6 +1,6 @@
 #include "boardview.h"
+#include "nvg.h"
 
-#include <nvg.h>
 #include <GLFW/glfw3.h>
 
 #include <core/board.h>

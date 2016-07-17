@@ -1,16 +1,12 @@
 # core library
 
-set(INCLUDE_DIRS
-	include
-)
-
 set(SOURCES
 	src/board.cpp
 )
 
-#self includes
-include_directories(${INCLUDE_DIRS})
-add_library(core ${SOURCES})
+add_library(core STATIC ${SOURCES})
+target_include_directories(core PUBLIC include)
+target_link_libraries(core PUBLIC base)
 
 #add tests
 add_subdirectory(test)
