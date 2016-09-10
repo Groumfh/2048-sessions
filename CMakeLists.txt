@@ -38,14 +38,9 @@ target_link_libraries(nanovg PRIVATE opengl)
 add_subdirectory(third_party/glfw)
 
 # *********************************************
-# libaries
+# libraries
 # *********************************************
 add_subdirectory(base)
 add_subdirectory(core)
 add_subdirectory(app)
 
-# *********************************************
-# Exercises
-# *********************************************
-add_subdirectory(exercises/ex1)
-add_subdirectory(exercises/ex2)
