@@ -24,4 +24,4 @@ add_executable(2048-sessions ${SOURCES} ${HEADERS})
 target_include_directories(2048-sessions
 	PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/resources)
 target_link_libraries(2048-sessions
-	PUBLIC core glfw nanovg)
+	PUBLIC core glfw nanovg glew)

@@ -37,6 +37,9 @@ target_link_libraries(nanovg PRIVATE opengl)
 # glfw
 add_subdirectory(third_party/glfw)
 
+# glew
+add_subdirectory(third_party/glew)
+
 # *********************************************
 # libraries
 # *********************************************

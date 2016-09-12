@@ -1,6 +1,11 @@
 #include "nvg.h"
 
-#include <OpenGL/gl.h>
+#ifdef __APPLE__
+	#include <OpenGL/gl.h>
+#else
+	#include <windows.h>
+	#include <GL/glew.h>
+#endif
 
 #define NANOVG_GL2
 #include <nanovg_gl.h>
