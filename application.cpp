@@ -30,12 +30,26 @@ public:
 
 	static void resizeCallback(GLFWwindow* window, int width, int height);
 	static void keyCallBack(GLFWwindow* window, int key, int scancode, int action, int mods);
-
+	static void clickCallBack(GLFWwindow* window, int button, int action, int mods);
 	void paintEvent(NVGcontext* context);
 	void keyEvent(int key, int scancode, int action, int mods);
+	void clickEvent();
 
 	void pushOnBoard(Board::Direction direction);
+
+	void StartGame();
+	void ExitApp();
+	void RestartGame();
 };
+
+
+
+
+void Application::Impl_::clickCallBack(GLFWwindow* window, int button, int action, int mods)
+{
+	app->impl_->clickEvent();
+
+}
 
 Application::Impl_::Impl_():
 	window_(glfwCreateWindow( 300, 300, "2048", NULL, NULL),glfwDestroyWindow),
@@ -49,7 +63,7 @@ void Application::Impl_::resizeCallback(GLFWwindow* window, int width, int heigh
 	NVGcontext* vgContext = NVG::instance()->context();
 	glClearColor(0.3f, 0.3f, 0.32f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
-
+	
 	// redraw directly
 	app->impl_->paintEvent(vgContext);
 
@@ -132,6 +146,13 @@ void Application::Impl_::keyEvent(int key, int scancode, int action, int mods){
 	}
 }
 
+void Application::Impl_::clickEvent()
+{
+	double* xpos, *ypos;
+	glfwGetCursorPos(window_.get(), xpos, ypos);
+	glfwDestroyWindow(window_.get());
+}
+
 void Application::Impl_::pushOnBoard(Board::Direction direction){
 	if (isEnd_) return;
 
@@ -147,6 +168,22 @@ void Application::Impl_::pushOnBoard(Board::Direction direction){
 	}
 }
 
+void Application::Impl_::StartGame()
+{
+
+}
+
+void Application::Impl_::ExitApp()
+{
+
+	//save
+	glfwDestroyWindow(window_.get());
+}
+
+void Application::Impl_::RestartGame()
+{
+}
+
 Application::Application(int argc, char** argv):
 	impl_(new Impl_){
 
@@ -159,6 +196,8 @@ Application::Application(int argc, char** argv):
 	// Set callback functions
 	glfwSetKeyCallback(impl_->window_.get(), Application::Impl_::keyCallBack);
 	glfwSetFramebufferSizeCallback(impl_->window_.get(),Application::Impl_::resizeCallback);
+
+	glfwSetMouseButtonCallback(impl_->window_.get(), Application::Impl_::clickCallBack);
 
 	glfwWindowHint(GLFW_DEPTH_BITS, 16);
 	glfwMakeContextCurrent(impl_->window_.get());
