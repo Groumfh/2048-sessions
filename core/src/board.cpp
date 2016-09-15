@@ -4,6 +4,7 @@
 #include <list>
 #include <exception>
 #include <assert.h>
+#include <string>
 
 #include <base.h>
 
@@ -101,6 +102,19 @@ PushArrayReport pushArray(Array& array){
 }
 
 // ****************************************
+//				Score class
+// ****************************************
+
+Score::Score() :
+	m_Value(0)
+{}
+
+std::string Score::getValue()
+{
+	return std::to_string(m_Value);
+}
+
+// ****************************************
 //         Board Impl
 // ****************************************
 
@@ -166,6 +180,8 @@ Array Board::Impl_::getArray(Board::Direction direction, uint32_t index) const{
 
 void Board::Impl_::setArray(Board::Direction direction, uint32_t index, Array& data)
 {
+	int compteur = 0;
+
 	if (direction & AXE_VERTICAL){
 		assert(data.size() == height_);
 		for (uint32_t i = 0; i < height_; i++){
@@ -263,6 +279,11 @@ void Board::setSquare(uint32_t x, uint32_t y, ContentValue value){
 	impl_->values_[x][y] = value;
 }
 
+int Board::getSquare(uint32_t x, uint32_t y) {
+	ENSURE_ACCESS_VALID(impl_, x, y);
+	return impl_->values_[x][y];
+}
+
 bool Board::isFull() const{
 	if (impl_->values_.empty()) return true;
 	return emptySquares().empty();
@@ -287,4 +308,3 @@ std::vector<Board::Pos> Board::emptySquares() const {
 	}
 	return res;
 }
-

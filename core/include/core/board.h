@@ -4,6 +4,19 @@
 #include <vector>
 #include <list>
 
+class Score
+{
+public:
+	Score();
+
+	std::string getValue();
+	void setValue(int INPUT) { m_Value = INPUT; }
+	void add(int INPUT) { setValue(m_Value + INPUT); }
+
+private:
+	int m_Value;
+};
+
 class Board
 {
 public:
@@ -26,8 +39,8 @@ public:
 	};
 
 	struct Report{
-		std::vector<std::pair<Pos,Pos> > moves_;
-		std::vector<std::pair<Pos,Pos> > merges_;
+		std::vector<std::pair<Pos,Pos>> moves_;
+		std::vector<std::pair<Pos,Pos>> merges_;
 		bool changed() const{ return !moves_.empty() || !merges_.empty();}
 	};
 
@@ -38,6 +51,7 @@ public:
 
 	ContentValue square(uint32_t x, uint32_t y);
 	void setSquare(uint32_t x, uint32_t y, ContentValue value);
+	int getSquare(uint32_t x, uint32_t y);
 
 	uint32_t height() const;
 	uint32_t width() const;
