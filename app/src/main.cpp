@@ -2,6 +2,7 @@
 #include "application.h"
 #include "nvg.h"
 #include "glfw.h"
+#include <GL/glew.h>
 
 int main(int argc, char **argv){
 
@@ -14,6 +15,8 @@ int main(int argc, char **argv){
 	if (!app.isInitialized()){
 		exit(-1);
 	}
+
+	glewInit();
 
 	NVG::start();
 	if (!NVG::instance()->isInitialized()){

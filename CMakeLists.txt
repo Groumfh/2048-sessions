@@ -8,12 +8,6 @@ project(2048-sessions)
 # activate C++ 11 features
 list( APPEND CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS} -g")
 
-set(CMAKE_MODULE_PATH
-  ${CMAKE_CURRENT_SOURCE_DIR}/cmake
-  ${CMAKE_MODULE_PATH})
-
-include(ExternalProject)
-
 # *********************************************
 # third parties
 # *********************************************
