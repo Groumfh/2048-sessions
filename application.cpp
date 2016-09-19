@@ -35,9 +35,10 @@ public:
 	void keyEvent(int key, int scancode, int action, int mods);
 
 	void pushOnBoard(Board::Direction direction);
-
+	const int get_nb_life() { return nb_life; }
+	void set_nb_life(int a) { nb_life = a; }
 private:
-	std::unique_ptr<int> nb_life;
+	int nb_life;
 };
 
 Application::Impl_::Impl_() :
@@ -45,7 +46,7 @@ Application::Impl_::Impl_() :
 	board_(new Board(4, 4)),
 	isEnd_(false)	
 {
-	*nb_life = 3;
+	nb_life = 3;
 }
 
 void Application::Impl_::resizeCallback(GLFWwindow* window, int width, int height){
@@ -94,6 +95,23 @@ void Application::Impl_::paintEvent(NVGcontext* context){
 
 	// draw the board
 	boardView_->paint(context,boardRect);
+
+	//display nb_life
+	std::string text("LIFE: ");
+	text.append(std::to_string(nb_life));
+	nvgBeginPath(context);
+	float x = 0;
+	float y = 0;
+	textRect.center(x, y);
+	nvgFontSize(context, 20);
+	nvgFontFace(context, "sans");
+	nvgTextAlign(context, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
+	nvgFill(context);
+	nvgFillColor(context, nvgRGBA(0, 0, 0, 255));
+	nvgText(context, x + 1, y + 1, text.c_str(), NULL);
+	nvgFillColor(context, nvgRGBA(200, 20, 20, 255));
+	nvgText(context, x, y, text.c_str(), NULL);
+
 
 	if (isEnd_){
 
@@ -206,7 +224,13 @@ int Application::run()
 		glfwPollEvents();
 
 		// test if end is occured
-		if (!impl_->board_->isMovable() && !impl_->isEnd_){
+		if (!impl_->board_->isMovable() && !impl_->isEnd_)
+		{
+			/*if (impl_->get_nb_life() > 0)
+			{
+				impl_->set_nb_life(impl_->get_nb_life()-1);
+				impl_->destroy_bloc();
+			}*/
 			impl_->isEnd_ = true;
 		}
 	}
