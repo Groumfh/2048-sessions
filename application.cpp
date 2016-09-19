@@ -192,7 +192,8 @@ void Application::Impl_::clickEvent(int button, int action, int mods)
 				{
 					if (boardView_->IsPointInSquare(xpos,ypos,i,j))
 					{
-						//std::cout << board_->square(i,j) << std::endl;
+						board_->setSquare(i, j, 0);
+
 						return;
 					}
 				}
