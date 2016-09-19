@@ -35,13 +35,17 @@ public:
 	void keyEvent(int key, int scancode, int action, int mods);
 
 	void pushOnBoard(Board::Direction direction);
+
+private:
+	std::unique_ptr<int> nb_life;
 };
 
-Application::Impl_::Impl_():
-	window_(glfwCreateWindow( 300, 300, "2048", NULL, NULL),glfwDestroyWindow),
-	board_(new Board(4,4)),
-	isEnd_(false)
+Application::Impl_::Impl_() :
+	window_(glfwCreateWindow(300, 300, "2048", NULL, NULL), glfwDestroyWindow),
+	board_(new Board(4, 4)),
+	isEnd_(false)	
 {
+	*nb_life = 3;
 }
 
 void Application::Impl_::resizeCallback(GLFWwindow* window, int width, int height){
