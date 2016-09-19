@@ -52,7 +52,8 @@ public:
 	std::unique_ptr<BoardView> boardView_;
 	std::unique_ptr<Score> m_Score;
 	bool isEnd_;
-
+	bool isBeginning_;
+	bool isInMenu_;
 	static void resizeCallback(GLFWwindow* window, int width, int height);
 	static void keyCallBack(GLFWwindow* window, int key, int scancode, int action, int mods);
 
@@ -66,6 +67,8 @@ Application::Impl_::Impl_():
 	window_(glfwCreateWindow( 300, 300, "2048", NULL, NULL),glfwDestroyWindow),
 	board_(new Board(4,4)),
 	isEnd_(false),
+	isBeginning_(false),
+	isInMenu_(true),
 	m_Score(new Score())
 {
 }
@@ -86,6 +89,32 @@ void Application::Impl_::keyCallBack(GLFWwindow* window, int key, int scancode, 
 	app->impl_->keyEvent(key,scancode,action,mods);
 }
 
+void drawButton(NVGcontext* context, const Rect & rect, const NVGcolor & color)
+{
+	nvgBeginPath(context);
+	nvgFillColor(context, color);
+	nvgRoundedRect(context, rect, 8); // Coutour arondie des coins
+	nvgFill(context);
+	nvgClosePath(context);
+}
+
+void drawText(NVGcontext* context, Rect & rect, const std::string text, float & x, float & y)
+{
+	x = 0;
+	y = 0;
+	nvgBeginPath(context);
+	rect.center(x, y);
+	float txtSize = rect.height;
+	nvgFontSize(context, txtSize);
+	nvgFontFace(context, "sans");
+	nvgTextAlign(context, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
+	nvgFill(context);
+	nvgFillColor(context, nvgRGBA(0, 0, 0, 255));
+	nvgText(context, x + 1, y + 1, text.c_str(), NULL);
+	nvgFillColor(context, nvgRGBA(0, 0, 0, 255));
+	nvgText(context, x, y, text.c_str(), NULL);
+}
+
 void Application::Impl_::paintEvent(NVGcontext* context){
 
 	int winWidth, winHeight;
@@ -95,68 +124,125 @@ void Application::Impl_::paintEvent(NVGcontext* context){
 	float pxRatio = (float)fWidth / (float)winWidth;
 	nvgBeginFrame(context, winWidth, winHeight, pxRatio);
 
-	Rect textRect(0.f,10.f,winWidth,20.f);
-	Rect boardMaxRect(0.f,textRect.height + textRect.y,winWidth,winHeight - textRect.height);
+	if (isInMenu_ == true)
+	{
+		//1ere couche orange
+		Rect MenuContour(10.f, 20.f, winWidth - 20.f, winHeight - 30.f);
+		drawButton(context, MenuContour, nvgRGBA(255, 140, 0, 255));
 
-	float boardSizeMin = std::min(boardMaxRect.width,boardMaxRect.height);
-	Rect boardRect(20.f, 20.f + textRect.height,boardSizeMin-40.f, boardSizeMin-40.f);
+		//2e couche menu blanc
+		Rect MenuContour2(14.f, 24.f, MenuContour.width - 10.f, MenuContour.height - 10.f);
+		drawButton(context, MenuContour2, nvgRGBA(255, 255, 255, 255));
 
-	if (boardMaxRect.height > boardMaxRect.width){
-		boardRect.move(0,(boardMaxRect.height - boardMaxRect.width)/2.f);
-	}else{
-		boardRect.move((boardMaxRect.width - boardMaxRect.height)/2.f,0);
+		// 3e couche menu noir
+		Rect MenuContour3(18.f, 28.f, MenuContour.width - 18.f, MenuContour.height - 18.f);
+		drawButton(context, MenuContour3, nvgRGBA(0, 0, 0, 255));
+
+		//4e couche Menu Blanc Transparent
+		Rect MenuContour4(27.f, 40.f, MenuContour.width - 34.f, MenuContour.height - 34.f);
+		drawButton(context, MenuContour4, nvgRGBA(255, 255, 255, 80));
+
+		//Contour texte autour texte 2048
+		Rect MenuContour2048(60.f, 50.f, MenuContour.width - 100.f, MenuContour.height / 6);
+		drawButton(context, MenuContour2048, nvgRGBA(0, 0, 0, 0));
+
+		//Bouton play
+		Rect MenuPlayButton(
+			MenuContour.width - MenuContour.width / 1.6f,
+			MenuContour.height - MenuContour.height / 2,
+			MenuContour.width / 3,
+			MenuContour.height / 6);
+		drawButton(context, MenuPlayButton, nvgRGBA(255, 255, 255, 80));
+
+		//Bouton Quit
+		Rect MenuQuitButton(MenuContour.width - MenuContour.width / 1.6f,
+			MenuContour.height - MenuContour.height / 6,
+			MenuContour.width / 3,
+			MenuContour.height / 6);
+		drawButton(context, MenuQuitButton, nvgRGBA(255, 255, 255, 80));
+
+		// & display 2048 menu text
+		float xTxt = 0;
+		float yTxt = 0;
+		drawText(context, MenuContour2048, "2048", xTxt, yTxt);
+
+		// & display Play menu text
+		drawText(context, MenuPlayButton, "Play", xTxt, yTxt);
+
+		// & display Quit menu text
+		drawText(context, MenuQuitButton, "Quit", xTxt, yTxt);
+
 	}
 
-	// draw the text rect
-	nvgBeginPath(context);
-	nvgFillColor(context, nvgRGBA(0,0,0,50));
-	nvgRect(context,textRect);
-	nvgFill(context);
-	nvgClosePath(context);
-
-	// draw the board
-	boardView_->paint(context,boardRect);
-
-	// define upper text properties
-	std::string text("SCORE : ");
-	text.append(m_Score->getValue().c_str());
-	float x = 0;
-	float y = 0;
-	textRect.center(x, y);
-	nvgFontSize(context, 20);
-	nvgFontFace(context, "sans");
-	nvgTextAlign(context, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
-
-	if (isEnd_)
+	if (isBeginning_ == true)
 	{
-		// change the color of the board
+		Rect textRect(0.f, 10.f, winWidth, 20.f);
+		Rect boardMaxRect(0.f, textRect.height + textRect.y, winWidth, winHeight - textRect.height);
+
+		float boardSizeMin = std::min(boardMaxRect.width, boardMaxRect.height);
+		Rect boardRect(20.f, 20.f + textRect.height, boardSizeMin - 40.f, boardSizeMin - 40.f);
+
+		if (boardMaxRect.height > boardMaxRect.width) {
+			boardRect.move(0, (boardMaxRect.height - boardMaxRect.width) / 2.f);
+		}
+		else {
+			boardRect.move((boardMaxRect.width - boardMaxRect.height) / 2.f, 0);
+		}
+		// draw the text rect
 		nvgBeginPath(context);
-		nvgFillColor(context, nvgRGBA(0,0,0,30));
-		nvgRect(context,boardMaxRect);
+		nvgFillColor(context, nvgRGBA(0, 0, 0, 50));
+		nvgRect(context, textRect);
 		nvgFill(context);
 		nvgClosePath(context);
 
-		// & display the game over
-		text.insert(0, "GAME OVER | ");
-		nvgBeginPath(context);
-		
-		nvgFill(context);
-		nvgFillColor(context, nvgRGBA(0,0,0,255));
-		nvgText(context,x+1,y+1,text.c_str(),NULL);
-		nvgFillColor(context, nvgRGBA(200,20,20,255));
-		nvgText(context,x,y,text.c_str(),NULL);
-	}
-	else
-	{
-		// draw score
-		nvgBeginPath(context);
+		// draw the board
+		boardView_->paint(context, boardRect);
 
-		nvgFill(context);
-		nvgFillColor(context, nvgRGBA(0, 0, 0, 255));
-		nvgText(context, x + 1, y + 1, text.c_str(), NULL);
-		nvgFillColor(context, nvgRGBA(20, 200, 20, 255));
-		nvgText(context, x, y, text.c_str(), NULL);
+		// define upper text properties
+		std::string text("SCORE : ");
+		text.append(m_Score->getValue().c_str());
+		float x = 0;
+		float y = 0;
+		textRect.center(x, y);
+		nvgFontSize(context, 20);
+		nvgFontFace(context, "sans");
+		nvgTextAlign(context, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
+
+		if (isEnd_)
+		{
+			// change the color of the board
+			nvgBeginPath(context);
+			nvgFillColor(context, nvgRGBA(0, 0, 0, 30));
+			nvgRect(context, boardMaxRect);
+			nvgFill(context);
+			nvgClosePath(context);
+
+			// & display the game over
+			text.insert(0, "GAME OVER | ");
+			nvgBeginPath(context);
+
+			nvgFill(context);
+			nvgFillColor(context, nvgRGBA(0, 0, 0, 255));
+			nvgText(context, x + 1, y + 1, text.c_str(), NULL);
+			nvgFillColor(context, nvgRGBA(200, 20, 20, 255));
+			nvgText(context, x, y, text.c_str(), NULL);
+		}
+		else
+		{
+			// draw score
+			nvgBeginPath(context);
+
+			nvgFill(context);
+			nvgFillColor(context, nvgRGBA(0, 0, 0, 255));
+			nvgText(context, x + 1, y + 1, text.c_str(), NULL);
+			nvgFillColor(context, nvgRGBA(20, 200, 20, 255));
+			nvgText(context, x, y, text.c_str(), NULL);
+		}
 	}
+
+	
+
+	
 
 	nvgEndFrame(context);
 }
