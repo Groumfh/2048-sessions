@@ -105,12 +105,10 @@ void Application::Impl_::paintEvent(NVGcontext* context){
 	textRect.center(x, y);
 	nvgFontSize(context, 20);
 	nvgFontFace(context, "sans");
-	nvgTextAlign(context, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
+	nvgTextAlign(context, NVG_ALIGN_MIDDLE | NVG_ALIGN_RIGHT);
 	nvgFill(context);
-	nvgFillColor(context, nvgRGBA(0, 0, 0, 255));
-	nvgText(context, x + 1, y + 1, text.c_str(), NULL);
-	nvgFillColor(context, nvgRGBA(200, 20, 20, 255));
-	nvgText(context, x, y, text.c_str(), NULL);
+	nvgFillColor(context, nvgRGBA(0, 0, 180, 255));
+	nvgText(context, x+x*0.7f , y , text.c_str(), NULL);
 
 
 	if (isEnd_){
