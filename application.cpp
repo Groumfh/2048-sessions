@@ -195,8 +195,7 @@ void Application::Impl_::clickEvent(int button, int action, int mods)
 						glfwGetWindowSize(window_.get(), w, h);
 						if (boardView_->IsPointInSquare(xpos,ypos,i,j,*h,*w))
 						{
-							//int val = board_->square(i, j);
-							//std::cout << val;
+							//clic sur le carré en (i,j)
 						}
 					}
 					
