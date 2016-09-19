@@ -1,4 +1,3 @@
-
 #include "application.h"
 #include "GL/glew.h"
 #include "nvg.h"

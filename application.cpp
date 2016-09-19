@@ -50,6 +50,7 @@ public:
 	std::unique_ptr<GLFWwindow,void(*)(GLFWwindow*)> window_;
 	std::unique_ptr<Board> board_;
 	std::unique_ptr<BoardView> boardView_;
+	std::unique_ptr<Score> m_Score;
 	bool isEnd_;
 
 	static void resizeCallback(GLFWwindow* window, int width, int height);
@@ -64,7 +65,8 @@ public:
 Application::Impl_::Impl_():
 	window_(glfwCreateWindow( 300, 300, "2048", NULL, NULL),glfwDestroyWindow),
 	board_(new Board(4,4)),
-	isEnd_(false)
+	isEnd_(false),
+	m_Score(new Score())
 {
 }
 
@@ -115,8 +117,18 @@ void Application::Impl_::paintEvent(NVGcontext* context){
 	// draw the board
 	boardView_->paint(context,boardRect);
 
-	if (isEnd_){
+	// define upper text properties
+	std::string text("SCORE : ");
+	text.append(m_Score->getValue().c_str());
+	float x = 0;
+	float y = 0;
+	textRect.center(x, y);
+	nvgFontSize(context, 20);
+	nvgFontFace(context, "sans");
+	nvgTextAlign(context, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
 
+	if (isEnd_)
+	{
 		// change the color of the board
 		nvgBeginPath(context);
 		nvgFillColor(context, nvgRGBA(0,0,0,30));
@@ -125,19 +137,25 @@ void Application::Impl_::paintEvent(NVGcontext* context){
 		nvgClosePath(context);
 
 		// & display the game over
-		std::string text("GAME OVER");
+		text.insert(0, "GAME OVER | ");
 		nvgBeginPath(context);
-		float x= 0;
-		float y= 0;
-		textRect.center(x,y);
-		nvgFontSize(context, 20);
-		nvgFontFace(context, "sans");
-		nvgTextAlign(context, NVG_ALIGN_MIDDLE|NVG_ALIGN_CENTER);
+		
 		nvgFill(context);
 		nvgFillColor(context, nvgRGBA(0,0,0,255));
 		nvgText(context,x+1,y+1,text.c_str(),NULL);
 		nvgFillColor(context, nvgRGBA(200,20,20,255));
 		nvgText(context,x,y,text.c_str(),NULL);
+	}
+	else
+	{
+		// draw score
+		nvgBeginPath(context);
+
+		nvgFill(context);
+		nvgFillColor(context, nvgRGBA(0, 0, 0, 255));
+		nvgText(context, x + 1, y + 1, text.c_str(), NULL);
+		nvgFillColor(context, nvgRGBA(20, 200, 20, 255));
+		nvgText(context, x, y, text.c_str(), NULL);
 	}
 
 	nvgEndFrame(context);
@@ -159,7 +177,15 @@ void Application::Impl_::keyEvent(int key, int scancode, int action, int mods){
 void Application::Impl_::pushOnBoard(Board::Direction direction){
 	if (isEnd_) return;
 
-	if (board_->push(direction).changed()){
+	Board::Report mpReport = board_->push(direction);
+
+	for each (auto merge in mpReport.merges_)
+	{
+		m_Score->add(board_->getSquare(merge.second.x, merge.second.y));
+		m_Score->add(board_->getSquare(merge.first.x, merge.first.y));
+	}
+
+	if (mpReport.changed()){
 		// generate a random square
 		std::vector<Board::Pos> squares = board_->emptySquares();
 		if (squares.size() != 0){
