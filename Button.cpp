@@ -6,10 +6,3 @@ Button::Button(Button_Type type)
 }
 
 
-void Button::OnClick(void* callback)
-{
-	if(isEnabled)
-		callback();
-
-}
-

@@ -27,6 +27,11 @@ void drawShadow(NVGcontext* context,Rect rect){
 
 class BoardView::Impl_ : public non_copyable
 {
+/*private:
+	float squareWidth;
+	float squareHeight;*/
+
+
 public:
 
 	Board* board_;
@@ -76,6 +81,7 @@ public:
 	}
 
 	std::map<int,NVGcolor> colors_;
+
 };
 
 
@@ -91,7 +97,7 @@ BoardView::~BoardView()
 
 void BoardView::paint(NVGcontext* context, Rect rect)
 {
-	Rect boardRect = rect;
+	boardRect = rect;
 	float boardMargin = 10;
 	boardRect.addMargin(boardMargin);
 
@@ -106,8 +112,8 @@ void BoardView::paint(NVGcontext* context, Rect rect)
 	// draw his shadow
 	drawShadow(context, rect);
 
-	float squareWidth = boardRect.width /impl_->board_->width();
-	float squareHeight = boardRect.height /impl_->board_->height();
+	squareWidth = boardRect.width /impl_->board_->width();
+	squareHeight = boardRect.height /impl_->board_->height();
 
 	// draw squares
 	for (uint32_t i = 0; i < impl_->board_->width(); i++){

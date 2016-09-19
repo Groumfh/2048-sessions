@@ -11,6 +11,9 @@
 
 #include <resources_path.h>
 #include "Button.h"
+
+#include<iostream>
+
 namespace {
 
 	static Application* app = NULL;
@@ -40,9 +43,8 @@ public:
 
 	void pushOnBoard(Board::Direction direction);
 
-	void StartGame();
-	void ExitApp();
-	void RestartGame();
+
+	Rect boardRect;
 };
 
 
@@ -107,6 +109,7 @@ void Application::Impl_::paintEvent(NVGcontext* context) {
 	nvgClosePath(context);
 
 	// draw the board
+	this->boardRect = boardRect;
 	boardView_->paint(context, boardRect);
 
 	if (isEnd_) {
@@ -172,6 +175,7 @@ void Application::Impl_::paintEvent(NVGcontext* context) {
 }
 
 void Application::Impl_::keyEvent(int key, int scancode, int action, int mods) {
+
 	if (action == GLFW_PRESS) {
 		switch (key) {
 		case GLFW_KEY_UP: pushOnBoard(Board::UP); return;
@@ -191,16 +195,9 @@ void Application::Impl_::clickEvent(int button, int action, int mods)
 {
 	double xpos = 0.0,
 		ypos = 0.0;
-
 	glfwGetCursorPos(window_.get(), &xpos, &ypos);
-
-	int winWidth = 0, winHeight = 0;
-	glfwGetWindowSize(window_.get(), &winWidth, &winHeight);
-	int fWidth = 0, fHeight = 0;
-	glfwGetFramebufferSize(window_.get(), &fWidth, &fHeight);
-	float pxRatio = (float)fWidth / (float)winWidth;
-
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+	{
 		for each (Button* label_button in buttons)
 		{
 			if (IS_MOUSE_IN_RECTANGLE(xpos, ypos, label_button->GetRectangle()))
@@ -208,40 +205,39 @@ void Application::Impl_::clickEvent(int button, int action, int mods)
 				switch (label_button->GetButtonType())
 				{
 				case B_play:
-					label_button->OnClick();
+					//action à exec quand bouton jouer clické
 					break;
 				case B_exit:
-					label_button->OnClick();
+					//exit app
 					break;
 				case B_retry:
-					label_button->OnClick();
+					//recommencer jeu
 					break;
 				default:
 					break;
 				}
+				return;
 			}
 		}
-	}
-	const Rect exitLabelRect = {
-		fWidth / 2.0f,
-		fHeight / 2.0f + 20.0f,
-		40.0f * pxRatio,
-		20.0f * pxRatio,
-	};
-
-	const Rect retryLabelRect = {
-		fWidth / 2.0f,
-		fHeight / 2.0f,
-		40.0f * pxRatio,
-		20.0f * pxRatio,
-	};
-
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-		if (isEnd_) {
-			if (IS_MOUSE_IN_RECTANGLE(xpos, ypos, exitLabelRect))   ExitApp();
-			if (IS_MOUSE_IN_RECTANGLE(xpos, ypos, retryLabelRect))  RestartGame();
+			for (uint32_t i = 0; i < board_.get()->width(); i++)
+			{
+				for (uint32_t j = 0; j < board_->height(); j++)
+				{
+					if (board_->square(i, j) != NULL)
+					{
+						int *h = new int();
+						int *w = new int();
+						glfwGetWindowSize(window_.get(), w, h);
+						if (boardView_->IsPointInSquare(xpos,ypos,i,j,*h,*w))
+						{
+							//int val = board_->square(i, j);
+							//std::cout << val;
+						}
+					}
+					
+				}
+			}
 		}
-	}
 }
 
 void Application::Impl_::pushOnBoard(Board::Direction direction) {
@@ -259,21 +255,6 @@ void Application::Impl_::pushOnBoard(Board::Direction direction) {
 	}
 }
 
-void Application::Impl_::StartGame()
-{
-
-}
-
-void Application::Impl_::ExitApp()
-{
-
-	//save
-	glfwDestroyWindow(window_.get());
-}
-
-void Application::Impl_::RestartGame() {
-	isEnd_ = false;
-}
 
 Application::Application(int argc, char** argv) :
 	impl_(new Impl_) {
