@@ -109,7 +109,6 @@ void Application::Impl_::paintEvent(NVGcontext* context) {
 	nvgClosePath(context);
 
 	// draw the board
-	this->boardRect = boardRect;
 	boardView_->paint(context, boardRect);
 
 	if (isEnd_) {
@@ -135,40 +134,6 @@ void Application::Impl_::paintEvent(NVGcontext* context) {
 		nvgText(context, x + 1, y + 1, text.c_str(), NULL);
 		nvgFillColor(context, nvgRGBA(200, 20, 20, 255));
 		nvgText(context, x, y, text.c_str(), NULL);
-
-		constexpr char* retryLabel = "RECOMMENCER";
-
-		nvgBeginPath(context);
-
-		float xRecommencer = fWidth / 2.0f,
-			yRecommencer = fHeight / 2.0f;
-
-		textRect.center(x, y);
-		nvgFontSize(context, 20);
-		nvgFontFace(context, "sans");
-		nvgTextAlign(context, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
-		nvgFill(context);
-		nvgFillColor(context, nvgRGBA(0, 0, 0, 255));
-		nvgText(context, xRecommencer + 1, yRecommencer + 1, retryLabel, nullptr);
-		nvgFillColor(context, nvgRGBA(200, 20, 20, 255));
-		nvgText(context, xRecommencer, yRecommencer, retryLabel, nullptr);
-
-		constexpr char* exitLabel = "QUITTER";
-
-		nvgBeginPath(context);
-
-		float xLabel = fWidth / 2.0f,
-			yLabel = fHeight / 2.0f + 20.0f;
-
-		textRect.center(x, y);
-		nvgFontSize(context, 20);
-		nvgFontFace(context, "sans");
-		nvgTextAlign(context, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
-		nvgFill(context);
-		nvgFillColor(context, nvgRGBA(0, 0, 0, 255));
-		nvgText(context, xLabel + 1, yLabel + 1, exitLabel, nullptr);
-		nvgFillColor(context, nvgRGBA(200, 20, 20, 255));
-		nvgText(context, xLabel, yLabel, exitLabel, nullptr);
 	}
 
 	nvgEndFrame(context);
