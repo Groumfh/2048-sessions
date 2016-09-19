@@ -287,4 +287,3 @@ std::vector<Board::Pos> Board::emptySquares() const {
 	}
 	return res;
 }
-

@@ -47,6 +47,7 @@ public:
 
 	std::vector<Pos> emptySquares() const;
 
+
 	Report push(Direction direction);
 
 private:

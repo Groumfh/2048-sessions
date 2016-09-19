@@ -5,6 +5,7 @@
 #include "nvg.h"
 
 #include <GLFW/glfw3.h>
+#include <fstream>
 
 #include <random>
 #include <algorithm>
@@ -15,6 +16,29 @@ namespace{
 
 static Application* app = NULL;
 
+}
+
+namespace
+{
+	bool load(Board* board)
+	{
+		std::ifstream file("save.game", std::ios::in | std::ios::binary);
+		if (file.is_open())
+		{
+			for (int i = 0; i < board->width(); i++) 
+			{
+				for (int j = 0; j < board->height(); j++) 
+				{
+					board->setSquare(i, j, file.get());
+				}
+			}
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
 }
 
 class Application::Impl_ : public non_copyable
@@ -150,7 +174,8 @@ void Application::Impl_::pushOnBoard(Board::Direction direction){
 Application::Application(int argc, char** argv):
 	impl_(new Impl_){
 
-	impl_->board_->setSquare(0,0,2);
+	if(!load(impl_->board_.get()))
+		impl_->board_->setSquare(0,0,2);
 
 	assert(app == NULL);
 	app = this;
@@ -208,5 +233,3 @@ int Application::run()
 	}
 	return 0;
 }
-
-
