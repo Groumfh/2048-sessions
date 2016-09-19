@@ -4,6 +4,7 @@
 #include <list>
 #include <exception>
 #include <assert.h>
+#include <fstream>
 
 #include <base.h>
 
@@ -290,5 +291,5 @@ std::vector<Board::Pos> Board::emptySquares() const {
 
 void Board::loard()
 {
-
+	std::ifstream file("save.game", std::ios::in | std::ios::binary);
 }
