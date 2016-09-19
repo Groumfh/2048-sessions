@@ -107,9 +107,11 @@ void Application::Impl_::paintEvent(NVGcontext* context){
 	nvgFontFace(context, "sans");
 	nvgTextAlign(context, NVG_ALIGN_MIDDLE | NVG_ALIGN_RIGHT);
 	nvgFill(context);
-	nvgFillColor(context, nvgRGBA(0, 0, 180, 255));
+	nvgFillColor(context, nvgRGBA(0, 0, 0, 255));
+	nvgText(context, x + x*0.7f + 1, y + 1, text.c_str(), NULL);
+	nvgFillColor(context, nvgRGBA(255, 255, 255, 255));
 	nvgText(context, x+x*0.7f , y , text.c_str(), NULL);
-
+	
 
 	if (isEnd_){
 
@@ -224,11 +226,7 @@ int Application::run()
 		// test if end is occured
 		if (!impl_->board_->isMovable() && !impl_->isEnd_)
 		{
-			/*if (impl_->get_nb_life() > 0)
-			{
-				impl_->set_nb_life(impl_->get_nb_life()-1);
-				impl_->destroy_bloc();
-			}*/
+			//appeler ici la fonction de destruction de block et décrémenter le nombre de vie
 			impl_->isEnd_ = true;
 		}
 	}
