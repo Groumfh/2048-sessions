@@ -46,7 +46,7 @@ public:
 	bool isMovable() const;
 
 	std::vector<Pos> emptySquares() const;
-	void loard();
+	bool loard();
 
 
 	Report push(Direction direction);

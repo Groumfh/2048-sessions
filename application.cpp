@@ -150,7 +150,8 @@ void Application::Impl_::pushOnBoard(Board::Direction direction){
 Application::Application(int argc, char** argv):
 	impl_(new Impl_){
 
-	impl_->board_->setSquare(0,0,2);
+	if(!impl_->board_->loard())
+		impl_->board_->setSquare(0,0,2);
 
 	assert(app == NULL);
 	app = this;

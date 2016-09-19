@@ -289,7 +289,20 @@ std::vector<Board::Pos> Board::emptySquares() const {
 	return res;
 }
 
-void Board::loard()
+bool Board::loard()
 {
 	std::ifstream file("save.game", std::ios::in | std::ios::binary);
+	if (file.is_open())
+	{
+		for (int i = 0; i < width(); i++) {
+			for (int j = 0; j < height(); j++) {
+				file >> impl_->values_[i][j];
+			}
+		}
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
