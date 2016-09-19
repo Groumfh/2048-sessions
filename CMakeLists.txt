@@ -70,6 +70,7 @@ set(SOURCES
 	nvg.cpp
 	glfw.cpp
 	boardview.cpp
+	Button.cpp
 	${GLEW_SOURCES}
 	${NANVOG_SOURCES})
 
