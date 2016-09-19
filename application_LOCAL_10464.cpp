@@ -161,7 +161,7 @@ void Application::Impl_::clickEvent(int button, int action, int mods)
 	double xpos = 0.0,
 		ypos = 0.0;
 	glfwGetCursorPos(window_.get(), &xpos, &ypos);
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
 	{
 		for each (Button* label_button in buttons)
 		{
@@ -184,22 +184,24 @@ void Application::Impl_::clickEvent(int button, int action, int mods)
 				return;
 			}
 		}
-		for (uint32_t i = 0; i < board_.get()->width(); i++)
-		{
-			for (uint32_t j = 0; j < board_->height(); j++)
+			for (uint32_t i = 0; i < board_.get()->width(); i++)
 			{
-				if (board_->square(i, j) != NULL)
+				for (uint32_t j = 0; j < board_->height(); j++)
 				{
-					if (boardView_->IsPointInSquare(xpos,ypos,i,j))
+					if (board_->square(i, j) != NULL)
 					{
-						//std::cout << board_->square(i,j) << std::endl;
-						return;
+						int *h = new int();
+						int *w = new int();
+						glfwGetWindowSize(window_.get(), w, h);
+						if (boardView_->IsPointInSquare(xpos,ypos,i,j,*h,*w))
+						{
+							//clic sur le carré en (i,j)
+						}
 					}
-				}
 					
+				}
 			}
 		}
-	}
 }
 
 void Application::Impl_::pushOnBoard(Board::Direction direction) {

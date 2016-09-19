@@ -1,10 +1,12 @@
 #include "application.h"
 
 #include <core/board.h>
+#include <Score.h>
 #include "boardview.h"
 #include "nvg.h"
 
 #include <GLFW/glfw3.h>
+#include <fstream>
 
 #include <random>
 #include <algorithm>
@@ -18,6 +20,29 @@ namespace {
 
 	static Application* app = NULL;
 
+}
+
+namespace
+{
+	bool load(Board* board)
+	{
+		std::ifstream file("save.game", std::ios::in | std::ios::binary);
+		if (file.is_open())
+		{
+			for (int i = 0; i < board->width(); i++) 
+			{
+				for (int j = 0; j < board->height(); j++) 
+				{
+					board->setSquare(i, j, file.get());
+				}
+			}
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
 }
 
 class Application::Impl_ : public non_copyable
@@ -43,6 +68,7 @@ public:
 
 	void pushOnBoard(Board::Direction direction);
 
+<<<<<<< HEAD
 
 	Rect boardRect;
 };
@@ -60,6 +86,18 @@ Application::Impl_::Impl_() :
 	window_(glfwCreateWindow(300, 300, "2048", NULL, NULL), glfwDestroyWindow),
 	board_(new Board(4, 4)),
 	isEnd_(false)
+=======
+private:
+
+	std::unique_ptr<Score> m_Score;
+};
+
+Application::Impl_::Impl_():
+	window_(glfwCreateWindow( 300, 300, "2048", NULL, NULL),glfwDestroyWindow),
+	board_(new Board(4,4)),
+	isEnd_(false),
+	m_Score(new Score())
+>>>>>>> 97a8a6d639c39d64e78385afc9068c97c4918d07
 {
 }
 
@@ -111,8 +149,20 @@ void Application::Impl_::paintEvent(NVGcontext* context) {
 	// draw the board
 	boardView_->paint(context, boardRect);
 
+<<<<<<< HEAD
 	if (isEnd_) {
+=======
+	// define text properties
+	float x = 0;
+	float y = 0;
+	textRect.center(x, y);
+	nvgFontSize(context, 20);
+	nvgFontFace(context, "sans");
+	nvgTextAlign(context, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
+>>>>>>> 97a8a6d639c39d64e78385afc9068c97c4918d07
 
+	if (isEnd_)
+	{
 		// change the color of the board
 		nvgBeginPath(context);
 		nvgFillColor(context, nvgRGBA(0, 0, 0, 30));
@@ -123,17 +173,25 @@ void Application::Impl_::paintEvent(NVGcontext* context) {
 		// & display the game over
 		std::string text("GAME OVER");
 		nvgBeginPath(context);
+<<<<<<< HEAD
 		float x = 0;
 		float y = 0;
 		textRect.center(x, y);
 		nvgFontSize(context, 20);
 		nvgFontFace(context, "sans");
 		nvgTextAlign(context, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
+=======
+		
+>>>>>>> 97a8a6d639c39d64e78385afc9068c97c4918d07
 		nvgFill(context);
 		nvgFillColor(context, nvgRGBA(0, 0, 0, 255));
 		nvgText(context, x + 1, y + 1, text.c_str(), NULL);
 		nvgFillColor(context, nvgRGBA(200, 20, 20, 255));
 		nvgText(context, x, y, text.c_str(), NULL);
+	}
+	else
+	{
+		m_Score->paint(context, x, y);
 	}
 
 	nvgEndFrame(context);
@@ -161,7 +219,7 @@ void Application::Impl_::clickEvent(int button, int action, int mods)
 	double xpos = 0.0,
 		ypos = 0.0;
 	glfwGetCursorPos(window_.get(), &xpos, &ypos);
-	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
 	{
 		for each (Button* label_button in buttons)
 		{
@@ -184,28 +242,40 @@ void Application::Impl_::clickEvent(int button, int action, int mods)
 				return;
 			}
 		}
-		for (uint32_t i = 0; i < board_.get()->width(); i++)
-		{
-			for (uint32_t j = 0; j < board_->height(); j++)
+			for (uint32_t i = 0; i < board_.get()->width(); i++)
 			{
-				if (board_->square(i, j) != NULL)
+				for (uint32_t j = 0; j < board_->height(); j++)
 				{
-					if (boardView_->IsPointInSquare(xpos,ypos,i,j))
+					if (board_->square(i, j) != NULL)
 					{
-						//std::cout << board_->square(i,j) << std::endl;
-						return;
+						int *h = new int();
+						int *w = new int();
+						glfwGetWindowSize(window_.get(), w, h);
+						if (boardView_->IsPointInSquare(xpos,ypos,i,j,*h,*w))
+						{
+							//clic sur le carré en (i,j)
+						}
 					}
-				}
 					
+				}
 			}
 		}
-	}
 }
 
 void Application::Impl_::pushOnBoard(Board::Direction direction) {
 	if (isEnd_) return;
 
+<<<<<<< HEAD
 	if (board_->push(direction).changed()) {
+=======
+	Board::Report mpReport = board_->push(direction);
+
+	// score update
+	for each (auto merge in mpReport.mergesResults_)
+		m_Score->add(merge);
+
+	if (mpReport.changed()){
+>>>>>>> 97a8a6d639c39d64e78385afc9068c97c4918d07
 		// generate a random square
 		std::vector<Board::Pos> squares = board_->emptySquares();
 		if (squares.size() != 0) {
@@ -218,10 +288,15 @@ void Application::Impl_::pushOnBoard(Board::Direction direction) {
 }
 
 
+<<<<<<< HEAD
 Application::Application(int argc, char** argv) :
 	impl_(new Impl_) {
 
 	impl_->board_->setSquare(0, 0, 2);
+=======
+	if(!load(impl_->board_.get()))
+		impl_->board_->setSquare(0,0,2);
+>>>>>>> 97a8a6d639c39d64e78385afc9068c97c4918d07
 
 	assert(app == NULL);
 	app = this;
@@ -280,4 +355,8 @@ int Application::run()
 		}
 	}
 	return 0;
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 97a8a6d639c39d64e78385afc9068c97c4918d07

@@ -124,3 +124,16 @@ void BoardView::paint(NVGcontext* context, Rect rect)
 	nvgClosePath(context);
 }
 
+
+bool BoardView::IsPointInSquare(float xpos, float ypos, uint32_t i, uint32_t j)
+{
+	Rect square = Rect(0, 0, squareWidth, squareHeight);
+	square.x = boardRect.x + squareWidth * i;
+	square.y = boardRect.y + squareHeight * j;
+
+	if (IS_MOUSE_IN_RECTANGLE(xpos, ypos, square))
+	{
+		return true;
+	}
+	return false;
+}
