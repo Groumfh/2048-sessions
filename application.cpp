@@ -67,7 +67,6 @@ Application::Impl_::Impl_():
 	window_(glfwCreateWindow( 300, 300, "2048", NULL, NULL),glfwDestroyWindow),
 	board_(new Board(4,4)),
 	isEnd_(false),
-	isBeginning_(false),
 	isInMenu_(true),
 	m_Score(new Score())
 {
@@ -173,8 +172,7 @@ void Application::Impl_::paintEvent(NVGcontext* context){
 		drawText(context, MenuQuitButton, "Quit", xTxt, yTxt);
 
 	}
-
-	if (isBeginning_ == true)
+	else
 	{
 		Rect textRect(0.f, 10.f, winWidth, 20.f);
 		Rect boardMaxRect(0.f, textRect.height + textRect.y, winWidth, winHeight - textRect.height);
@@ -240,10 +238,6 @@ void Application::Impl_::paintEvent(NVGcontext* context){
 		}
 	}
 
-	
-
-	
-
 	nvgEndFrame(context);
 }
 
@@ -256,12 +250,14 @@ void Application::Impl_::keyEvent(int key, int scancode, int action, int mods){
 			case GLFW_KEY_LEFT: pushOnBoard(Board::LEFT); return;
 			case GLFW_KEY_RIGHT: pushOnBoard(Board::RIGHT); return;
 			case GLFW_KEY_ESCAPE: glfwSetWindowShouldClose(window_.get(), GL_TRUE); return;
+
+			case GLFW_KEY_HOME: isInMenu_ = !isInMenu_; return;
 		}
 	}
 }
 
 void Application::Impl_::pushOnBoard(Board::Direction direction){
-	if (isEnd_) return;
+	if (isEnd_ || isInMenu_) return;
 
 	Board::Report mpReport = board_->push(direction);
 
